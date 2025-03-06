@@ -26,12 +26,11 @@ function Users() {
         <div>
             <Modal
               open={open}
-              onClose={handleClose}
               aria-labelledby="modal-modal-title"
               aria-describedby="modal-modal-description"
             >
               <Box className="adduserModal">
-              <Addusermodal />
+              <Addusermodal closeEvent={handleClose}/>
               </Box>
             </Modal>
         </div>
