@@ -3,11 +3,10 @@ import { IconButton, Typography, Box, TextField, Button } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import { useNavigate } from 'react-router-dom';
 import CloseIcon from "@mui/icons-material/Close";
+import http from '../http';
 
 function Addusermodal({closeEvent}) {
-  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
@@ -43,7 +42,11 @@ function Addusermodal({closeEvent}) {
       http.post("/user", data)
           .then((res) => {
               console.log(res.data);
-              navigate("/user");
+              // closeEvent();
+              
+          })
+          .catch((error) => {
+            console.error("There was an error submitting the data:", error);
           });
   }
 
