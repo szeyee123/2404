@@ -9,17 +9,19 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import http from '../http';
 import { useEffect, useState } from 'react';
+import IconButton from '@mui/material/IconButton';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 const columns = [
-  { 
-    id: 'id', 
-    label: 'User ID', 
-    minWidth: 170 
+  {
+    id: 'id',
+    label: 'User ID',
+    minWidth: 170
   },
-  { 
-    id: 'name', 
-    label: 'Name', 
-    minWidth: 100 
+  {
+    id: 'name',
+    label: 'Name',
+    minWidth: 100
   },
   {
     id: 'number',
@@ -49,14 +51,14 @@ const columns = [
   },
 ];
 
-export default function Viewallusers() {
+export default function Viewallusers({ openEditModal, setUser }) {
   const [userList, setUserList] = useState([]);
 
   useEffect(() => {
-      http.get('/user').then((res) => {
-        console.log(res.data);
-        setUserList(res.data);
-      });
+    http.get('/user').then((res) => {
+      console.log(res.data);
+      setUserList(res.data);
+    });
   }, []);
 
   const [page, setPage] = React.useState(0);
@@ -70,6 +72,11 @@ export default function Viewallusers() {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
+
+  const handleEditUser = (user) => {
+    setUser(user);
+    openEditModal(true);
+  }
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -93,17 +100,20 @@ export default function Viewallusers() {
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((user) => {
                 return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={user.id}>
+                  <TableRow hover tabIndex={-1} key={user.id} onClick={() => handleEditUser(user)}>
                     {columns.map((column) => {
                       const value = user[column.id];
                       return (
                         <TableCell key={column.id} align={column.align}>
-                          {column.format && value 
+                          {column.format && value
                             ? column.format(value)
                             : value}
                         </TableCell>
                       );
                     })}
+                    <IconButton aria-label="Actions">
+                      <MoreVertIcon />
+                    </IconButton>
                   </TableRow>
                 );
               })}
