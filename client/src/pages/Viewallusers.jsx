@@ -11,6 +11,8 @@ import http from '../http';
 import { useEffect, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 
 const columns = [
   {
@@ -51,8 +53,9 @@ const columns = [
   },
 ];
 
-export default function Viewallusers({ openEditModal, setUser }) {
+export default function Viewallusers({ openEditModal, openDeleteModal, setUser }) {
   const [userList, setUserList] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     http.get('/user').then((res) => {
@@ -73,14 +76,29 @@ export default function Viewallusers({ openEditModal, setUser }) {
     setPage(0);
   };
 
-  const handleEditUser = (user) => {
+  const handleMenuOpen = (event, user) => {
+    setAnchorEl(event.currentTarget);
     setUser(user);
-    openEditModal(true);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleEditUser = () => {
+    handleMenuClose();
+    openEditModal();
+  };
+
+  const handleDeleteUser = () => {
+    console.log("handledeleteuser")
+    handleMenuClose();
+    openDeleteModal();
   }
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableContainer sx={{ maxHeight: 440 }}>
+      <TableContainer sx={{ maxHeight: 600 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -100,7 +118,7 @@ export default function Viewallusers({ openEditModal, setUser }) {
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((user) => {
                 return (
-                  <TableRow hover tabIndex={-1} key={user.id} onClick={() => handleEditUser(user)}>
+                  <TableRow hover tabIndex={-1} key={user.id}>
                     {columns.map((column) => {
                       const value = user[column.id];
                       return (
@@ -111,7 +129,7 @@ export default function Viewallusers({ openEditModal, setUser }) {
                         </TableCell>
                       );
                     })}
-                    <IconButton aria-label="Actions">
+                    <IconButton aria-label="Actions" onClick={(event) => handleMenuOpen(event, user)}>
                       <MoreVertIcon />
                     </IconButton>
                   </TableRow>
@@ -129,6 +147,15 @@ export default function Viewallusers({ openEditModal, setUser }) {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
+      {/* Dropdown Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleEditUser}>Edit</MenuItem>
+        <MenuItem onClick={handleDeleteUser}>Delete</MenuItem>
+      </Menu>
     </Paper>
   );
 }

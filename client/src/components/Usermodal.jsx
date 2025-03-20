@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { IconButton, Typography, Box, TextField, Button, Modal } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useFormik } from 'formik';
@@ -6,7 +6,7 @@ import * as yup from 'yup';
 import CloseIcon from "@mui/icons-material/Close";
 import http from '../http';
 
-function Addusermodal({ closeEvent, open, user }) {
+function Usermodal({ closeEvent, open, user }) {
 
   const formik = useFormik({
     initialValues: {
@@ -71,11 +71,15 @@ function Addusermodal({ closeEvent, open, user }) {
     if (user) {
       formik.resetForm({ values: { ...formik.initialValues, ...user } });
     }
+    else {
+      formik.resetForm();
+    }
   }, [user]);
   
   const onClose = () => {
-    formik.resetForm({ values: formik.initialValues });
+    formik.resetForm();
     closeEvent();
+    window.location.reload();
   };  
 
   return (
@@ -171,4 +175,4 @@ function Addusermodal({ closeEvent, open, user }) {
 }
 
 
-export default Addusermodal
+export default Usermodal
