@@ -91,7 +91,6 @@ export default function Viewallusers({ openEditModal, openDeleteModal, setUser }
   };
 
   const handleDeleteUser = () => {
-    console.log("handledeleteuser")
     handleMenuClose();
     openDeleteModal();
   }

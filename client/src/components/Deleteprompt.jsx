@@ -1,39 +1,63 @@
-import React, { useEffect, useState } from 'react'
-import { Dialog, Button } from "@mui/material";
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
+import React from "react";
+import http from '../http';
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+} from "@mui/material";
 
-export default function Deleteprompt({ closeEvent, open, user }) {
-  
-  const onClose = () => {
-    setOpenPrompt(false);
+function Deleteprompt ({ open, closeEvent, user }) {
+
+  const handleDelete = () => {
+    http.delete(`/user/${user.id}`)
     closeEvent();
-  };  
+    window.location.reload();
+  };
 
   return (
-    <>
-      <Dialog
-        open={open}
-        onClose={onClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          Are you sure you want to delete this user?
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            User Details here {user}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button onClick={onClose}>Delete</Button>
-        </DialogActions>
-      </Dialog>
-    </>
-  )
-}
+    <Dialog open={open} onClose={closeEvent}>
+      <DialogTitle>Delete Confirmation</DialogTitle>
+      <DialogContent>
+        {user ? (
+          <>
+            <DialogContentText>
+              Are you sure you want to delete <b>{user.name}</b>?
+            </DialogContentText>
+            <DialogContentText>
+              <b>ID:</b> {user.id}
+            </DialogContentText>
+            <DialogContentText>
+              <b>Email:</b> {user.email}
+            </DialogContentText>
+            <DialogContentText>
+              <b>Mobile number:</b> {user.number}
+            </DialogContentText>
+            <DialogContentText>
+              <b>Address:</b> {user.address}
+            </DialogContentText>
+          </>
+        ) : (
+          <DialogContentText>Loading user details...</DialogContentText>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={closeEvent} color="primary">
+          Cancel
+        </Button>
+        <Button onClick={() => {
+            if (handleDelete) handleDelete(user?.id);
+          }} 
+          color="secondary" 
+          disabled={!user}
+        >
+          Delete
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
 
+export default Deleteprompt;

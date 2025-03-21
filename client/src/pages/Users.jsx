@@ -13,9 +13,7 @@ export default function Users() {
   const [user, setUser] = useState();
 
   const handleOpenEdit = () => setOpenEditModal(true);
-  const handleOpenDelete = () => {
-    setOpenDeleteModal(true)
-  };
+  const handleOpenDelete = () => setOpenDeleteModal(true);
 
   const handleCloseEditModal = () => {
     setOpenEditModal(false);
@@ -43,8 +41,8 @@ export default function Users() {
             <h1>View all users</h1>
             <Button variant="contained" onClick={handleAddNewUser} >Add new user</Button>
           </div>
-          <Usermodal closeEvent={handleCloseEditModal} openEditModal={openEditModal} user={user} />
-          <Deleteprompt closeEvent={handleCloseDeleteModal} openDeleteModal={openDeleteModal} user={user} />
+          <Usermodal closeEvent={handleCloseEditModal} open={openEditModal} user={user} />
+          <Deleteprompt closeEvent={handleCloseDeleteModal} open={openDeleteModal} user={user}  />
           <Viewallusers 
             openEditModal={handleOpenEdit} 
             openDeleteModal={handleOpenDelete} 
