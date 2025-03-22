@@ -5,15 +5,18 @@ import { Box, Button } from "@mui/material";
 import Viewallusers from "./Viewallusers";
 import Usermodal from '../components/Usermodal';
 import Deleteprompt from '../components/Deleteprompt';
+import Blockuserprompt from '../components/Blockuserprompt';
 import '../index.css';
 
 export default function Users() {
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [openBlockUserModal, setOpenBlockUserModal] = useState(false);
   const [user, setUser] = useState();
 
   const handleOpenEdit = () => setOpenEditModal(true);
   const handleOpenDelete = () => setOpenDeleteModal(true);
+  const handleOpenBlockUser = () => setOpenBlockUserModal(true);
 
   const handleCloseEditModal = () => {
     setOpenEditModal(false);
@@ -25,10 +28,17 @@ export default function Users() {
     setUser();
   };
 
+  const handleCloseBlockUserModal = () => {
+    setOpenBlockUserModal(false);
+    setUser();
+    window.location.reload();
+  };
+
   const handleAddNewUser = () => {
     setUser();
     setOpenEditModal(true);
   }
+  
 
   return (
     <>
@@ -43,9 +53,12 @@ export default function Users() {
           </div>
           <Usermodal closeEvent={handleCloseEditModal} open={openEditModal} user={user} />
           <Deleteprompt closeEvent={handleCloseDeleteModal} open={openDeleteModal} user={user}  />
+          <Blockuserprompt closeEvent={handleCloseBlockUserModal} open={openBlockUserModal} user={user}  />
           <Viewallusers 
             openEditModal={handleOpenEdit} 
             openDeleteModal={handleOpenDelete} 
+            openBlockUserModal={handleOpenBlockUser} 
+            user={user}
             setUser={setUser} 
           />
         </Box>

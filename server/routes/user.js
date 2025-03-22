@@ -11,7 +11,8 @@ router.post("/", async (req, res) => {
         name: yup.string().trim().min(3).max(100).required(),
         email: yup.string().trim().min(3).max(500).email().required(),
         number: yup.string().trim().matches(/^\d{8}$/,"Mobile number must be exactly 8 digits").required(),
-        address: yup.string().trim().min(3).max(500).required()
+        address: yup.string().trim().min(3).max(500).required(),
+        status: yup.string().oneOf(["active", "blocked"]).default("active")
     });
     try {
         data = await validationSchema.validate(data,
@@ -34,13 +35,15 @@ router.get("/", async (req, res) => {
             { name: { [Op.like]: `%${search}%` } },
             { email: { [Op.like]: `%${search}%` } },
             { number: { [Op.like]: `%${search}%` } },
-            { address: { [Op.like]: `%${search}%` } }
+            { address: { [Op.like]: `%${search}%` } },
+            { status: { [Op.like]: `%${search}%` } }
         ];
     }
     // You can add condition for other columns here
     // e.g. condition.columnName = value;
 
     let list = await User.findAll({
+        where: condition,
         order: [['createdAt', 'DESC']]
     });
     res.json(list);
@@ -119,5 +122,28 @@ router.delete("/:id", async (req, res) => {
         });
     }
 });
+
+router.patch("/:id/status", async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+  
+    if (!["active", "blocked"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+  
+    try {
+      const user = await User.findByPk(id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      user.status = status;
+      await user.save();
+  
+      res.json({ message: `User ${id} updated to ${status}`, user });
+    } catch (err) {
+      res.status(500).json({ message: "Database error", error: err });
+    }
+  });
 
 module.exports = router;

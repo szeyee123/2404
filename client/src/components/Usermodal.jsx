@@ -13,7 +13,8 @@ function Usermodal({ closeEvent, open, user }) {
       name: user?.name || "",
       email: user?.email || "",
       number: user?.number || "",
-      address: user?.address || ""
+      address: user?.address || "",
+      status: user?.status || "active"
     },
     validationSchema: yup.object({
       name: yup.string().trim()
@@ -39,7 +40,8 @@ function Usermodal({ closeEvent, open, user }) {
         name: data.name.trim(),
         email: data.email.trim(),
         number: data.number.trim(),
-        address: data.address.trim()
+        address: data.address.trim(),
+        status: data.status
       };
   
       if (user?.id) {

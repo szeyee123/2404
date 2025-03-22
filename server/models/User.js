@@ -29,6 +29,11 @@ module.exports = (sequelize, DataTypes) => {
         address: {
             type: DataTypes.TEXT,
             allowNull: false
+        },
+        status: {
+            type: DataTypes.ENUM("active", "blocked"), // Allows only "active" or "blocked"
+            allowNull: false,
+            defaultValue: "active" // Default is active
         }
     }, {
         tableName: 'users'

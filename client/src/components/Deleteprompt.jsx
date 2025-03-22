@@ -21,7 +21,7 @@ function Deleteprompt ({ open, closeEvent, user }) {
     <Dialog open={open} onClose={closeEvent}>
       <DialogTitle>Delete Confirmation</DialogTitle>
       <DialogContent>
-        {user ? (
+        {user && (
           <>
             <DialogContentText>
               Are you sure you want to delete <b>{user.name}</b>?
@@ -39,8 +39,6 @@ function Deleteprompt ({ open, closeEvent, user }) {
               <b>Address:</b> {user.address}
             </DialogContentText>
           </>
-        ) : (
-          <DialogContentText>Loading user details...</DialogContentText>
         )}
       </DialogContent>
       <DialogActions>

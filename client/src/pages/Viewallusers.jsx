@@ -13,6 +13,7 @@ import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import Chip from '@mui/material/Chip';
 
 const columns = [
   {
@@ -38,6 +39,12 @@ const columns = [
     align: 'right',
   },
   {
+    id: 'status',
+    label: 'Status',
+    minWidth: 100,
+    align: 'center',
+  },
+  {
     id: 'updatedAt',
     label: 'Updated at',
     minWidth: 170,
@@ -53,7 +60,7 @@ const columns = [
   },
 ];
 
-export default function Viewallusers({ openEditModal, openDeleteModal, setUser }) {
+export default function Viewallusers({ openEditModal, openDeleteModal, openBlockUserModal, user, setUser }) {
   const [userList, setUserList] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -95,6 +102,11 @@ export default function Viewallusers({ openEditModal, openDeleteModal, setUser }
     openDeleteModal();
   }
 
+  const handleBlockUser = (user) => {
+    handleMenuClose();
+    openBlockUserModal(user);
+  }
+
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer sx={{ maxHeight: 600 }}>
@@ -120,6 +132,18 @@ export default function Viewallusers({ openEditModal, openDeleteModal, setUser }
                   <TableRow hover tabIndex={-1} key={user.id}>
                     {columns.map((column) => {
                       const value = user[column.id];
+                      if (column.id === "status") {
+                        return (
+                          <TableCell key={column.id} align={column.align}>
+                            <Chip
+                              label={value}
+                              color={value === "active" ? "success" : "error"}
+                              variant="outlined"
+                              sx={{ fontWeight: "bold" }}
+                            />
+                          </TableCell>
+                        );
+                      }
                       return (
                         <TableCell key={column.id} align={column.align}>
                           {column.format && value
@@ -154,6 +178,9 @@ export default function Viewallusers({ openEditModal, openDeleteModal, setUser }
       >
         <MenuItem onClick={handleEditUser}>Edit</MenuItem>
         <MenuItem onClick={handleDeleteUser}>Delete</MenuItem>
+        <MenuItem onClick={handleBlockUser}>
+          {user?.status === "active" ? "Block User" : "Unblock User"}
+        </MenuItem>
       </Menu>
     </Paper>
   );
