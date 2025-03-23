@@ -21,45 +21,45 @@ Before getting started, make sure you have the following installed on your machi
 
 ### 1. Clone the Repository
 
-Clone the repository to your local machine using the following command:
+Clone the repository to your local machine using the following command:<br>
 git clone https://github.com/yourusername/2404.git
 
 2. Set Up MySQL Database
 You need to set up a MySQL database to store your data. Here's how:
-    1. Log in to your MySQL server:
+    1. Log in to your MySQL server:<br>
         mysql -u root -p
 
-    2. Create a new database in SQL:
+    2. Create a new database in SQL:<br>
         CREATE DATABASE your_database_name;
 
-    3. Ensure the .env file in the root directory of the project to store your MySQL connection details:
-        DB_HOST=localhost
-        DB_USER=root
-        DB_PASSWORD=yourpassword
+    3. Ensure the .env file in the root directory of the project to store your MySQL connection details:<br>
+        DB_HOST=localhost<br>
+        DB_USER=root<br>
+        DB_PASSWORD=yourpassword<br>
         DB_NAME=your_database_name
 
     *If you have any tables or schema to import, you can do it now (for example, by running a SQL script).
 
-3. Backend Setup (Node.js with Express.js)
-    1. Install Backend Dependencies
-        Navigate to the backend directory and install the required dependencies:
-        cd backend
-        npm install
-        Start the Backend Server
+3. Backend Setup (Node.js with Express.js) <br>
+   **Install Backend Dependencies** <br>
+    Navigate to the backend directory and install the required dependencies:<br>
+    cd backend<br>
+    npm install<br>
     
-        After installing the dependencies, start the backend server:
-        npm start
+    **Start the Backend Server** <br>
+    After installing the dependencies, start the backend server:<br>
+    npm start
 
-        You should see the backend server will now be running at http://localhost:portnumberbackend.
+    You should see the backend server will now be running at http://localhost:portnumberbackend.
 
 4. Frontend Setup (React.js)
-    Install Frontend Dependencies
-    Navigate to the frontend directory and install the required dependencies:
-    cd ../frontend
+    **Install Frontend Dependencies**
+    Navigate to the frontend directory and install the required dependencies:<br>
+    cd ../frontend <br>
     npm install
 
-    Start the Frontend Server
-    After installing the dependencies, start the frontend server:
+    **Start the Frontend Server** <br>
+    After installing the dependencies, start the frontend server: <br>
     npm start
 
     The frontend application will now be running at http://localhost:portnumberfrontend.
@@ -72,10 +72,11 @@ You need to set up a MySQL database to store your data. Here's how:
 
     Port Conflicts: If the ports 3000 or 5000 are already in use, you can change them in the respective configuration files (package.json for React and server.js or app.js for Express).
 
-    CORS Errors: If you encounter CORS issues, make sure the backend is set up to allow requests from the frontend. You can use the cors package in your Express backend:
-    npm install cors
-    Then, in app.js (or your Express setup file), add:
-    const cors = require('cors');
+    CORS Errors: If you encounter CORS issues, make sure the backend is set up to allow requests from the frontend. You can use the cors package in your Express backend: <br>
+    npm install cors <br>
+    
+    Then, in app.js (or your Express setup file), add: <br>
+    const cors = require('cors'); <br>
     app.use(cors());
 
 ## Project Structure
