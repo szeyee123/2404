@@ -1,71 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const { User } = require('../models');
+const { User, Address } = require('../models');  // Ensure you import the Address model too
 const { Op } = require('sequelize');
 const yup = require('yup');
 
+// POST
 // Create User with multiple addresses
 router.post('/', async (req, res) => {
     let data = req.body;
-    
-    // Validation Schema
+
     const validationSchema = yup.object({
         name: yup.string().trim().min(3).max(100).required(),
         email: yup.string().trim().min(3).max(255).email().required(),
-        number: yup.string().trim().matches(/^\d{8}$/, 'Mobile number must be exactly 8 digits').required(),
-        addresses: yup.array().of(
-            yup.object({
-                street: yup.string().trim().min(3).max(255).required(),
-                city: yup.string().trim().min(3).max(150).required(),
-                country: yup.string().trim().min(3).max(150).required(),
-                zipCode: yup.string().trim().min(3).max(10).required(),
-                isDefault: yup.boolean().default(false)
-            })
-        ).required(),  // Ensures the addresses field is provided as an array
-        status: yup.string().oneOf(['active', 'blocked']).default('active')
-    });
-
-    try {
-        data = await validationSchema.validate(data, { abortEarly: false });
-        const result = await User.create(data);
-        res.json(result);
-    } catch (err) {
-        res.status(400).json({ errors: err.errors });
-    }
-});
-
-// Get All Users
-router.get('/', async (req, res) => {
-    const search = req.query.search;
-    const condition = search ? {
-        [Op.or]: [
-            { name: { [Op.like]: `%${search}%` } },
-            { email: { [Op.like]: `%${search}%` } },
-            { number: { [Op.like]: `%${search}%` } },
-            { status: { [Op.like]: `%${search}%` } }
-        ]
-    } : {};
-
-    const users = await User.findAll({ where: condition, order: [['createdAt', 'DESC']] });
-    res.json(users);
-});
-
-// Get User by ID
-router.get('/:id', async (req, res) => {
-    const user = await User.findByPk(req.params.id);
-    if (!user) return res.sendStatus(404);
-    res.json(user);
-});
-
-// Update User
-router.put('/:id', async (req, res) => {
-    const user = await User.findByPk(req.params.id);
-    if (!user) return res.sendStatus(404);
-
-    // Validation Schema for update
-    const validationSchema = yup.object({
-        name: yup.string().trim().min(3).max(100).required(),
-        email: yup.string().trim().min(3).max(500).email().required(),
         number: yup.string().trim().matches(/^\d{8}$/, 'Mobile number must be exactly 8 digits').required(),
         addresses: yup.array().of(
             yup.object({
@@ -80,33 +26,209 @@ router.put('/:id', async (req, res) => {
     });
 
     try {
-        const data = await validationSchema.validate(req.body, { abortEarly: false });
-        await User.update(data, { where: { id: req.params.id } });
-        res.json({ message: 'User updated successfully.' });
+        data = await validationSchema.validate(data, { abortEarly: false });
+
+        // Create User
+        const user = await User.create({
+            name: data.name,
+            email: data.email,
+            number: data.number,
+            status: data.status
+        });
+
+        // Create Addresses and associate with user
+        const addresses = await Promise.all(
+            data.addresses.map(address => {
+                return Address.create({
+                    ...address,
+                    userId: user.id 
+                });
+            })
+        );
+
+        res.json({ user, addresses });
     } catch (err) {
         res.status(400).json({ errors: err.errors });
     }
 });
 
-// Delete User
-router.delete('/:id', async (req, res) => {
-    const result = await User.destroy({ where: { id: req.params.id } });
-    if (result) res.json({ message: 'User deleted successfully.' });
-    else res.status(404).json({ message: 'User not found.' });
+// Add New Address for an Existing User
+router.post('/:userId/addresses', async (req, res) => {
+    const { userId } = req.params;
+    const { street, city, country, zipCode, isDefault } = req.body;
+
+    const addressValidationSchema = yup.object({
+        street: yup.string().trim().min(3).max(255).required(),
+        city: yup.string().trim().min(3).max(150).required(),
+        country: yup.string().trim().min(3).max(150).required(),
+        zipCode: yup.string().trim().min(3).max(10).required(),
+        isDefault: yup.boolean().default(false)
+    });
+
+    try {
+        await addressValidationSchema.validate(req.body, { abortEarly: false });
+
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Ensure only one default address exists
+        if (isDefault) {
+            const defaultAddressCount = await Address.count({
+                where: { userId, isDefault: true }
+            });
+
+            if (defaultAddressCount > 0) {
+                return res.status(400).json({ message: 'User can have only one default address' });
+            }
+        }
+
+        const address = await Address.create({
+            street,
+            city,
+            country,
+            zipCode,
+            isDefault,
+            userId  
+        });
+
+        res.json({ message: 'Address added successfully', address });
+    } catch (err) {
+        res.status(400).json({ errors: err.errors || err.message });
+    }
 });
 
-// Update User Status
-router.patch('/:id/status', async (req, res) => {
-    const { status } = req.body;
-    if (!['active', 'blocked'].includes(status)) return res.status(400).json({ message: 'Invalid status' });
+// GET
+// Get All Addresses for a specific user by userId
+router.get('/:userId/addresses', async (req, res) => {
+    const { userId } = req.params;  // Get userId from the URL parameter
 
-    const user = await User.findByPk(req.params.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    try {
+        // Check if the user exists
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
-    user.status = status;
-    await user.save();
+        // Find all addresses associated with the user
+        const addresses = await Address.findAll({
+            where: { userId },  // Filter by userId
+            order: [['createdAt', 'DESC']]  // Optional: Order by creation date
+        });
 
-    res.json({ message: `User status updated to ${status}` });
+        // If no addresses are found
+        if (addresses.length === 0) {
+            return res.status(404).json({ message: 'No addresses found for this user' });
+        }
+
+        // Respond with the user's addresses
+        res.json(addresses);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
 });
+
+// Get All Users with their associated addresses
+router.get('/', async (req, res) => {
+    const search = req.query.search;
+    const condition = search ? {
+        [Op.or]: [
+            { name: { [Op.like]: `%${search}%` } },
+            { email: { [Op.like]: `%${search}%` } },
+            { number: { [Op.like]: `%${search}%` } },
+            { status: { [Op.like]: `%${search}%` } }
+        ]
+    } : {};
+
+    const users = await User.findAll({
+        where: condition,
+        include: [Address],
+        order: [['createdAt', 'DESC']]
+    });
+    res.json(users);
+});
+
+// DELETE
+// Delete Address by ID for a specific user
+router.delete('/:userId/addresses/:addressId', async (req, res) => {
+    const { userId, addressId } = req.params;  // Get userId and addressId from the URL parameters
+
+    try {
+        // Check if the user exists
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if the address exists for the given user
+        const address = await Address.findOne({
+            where: { id: addressId, userId: userId }
+        });
+
+        if (!address) {
+            return res.status(404).json({ message: 'Address not found' });
+        }
+
+        // Delete the address
+        await address.destroy();
+
+        res.json({ message: 'Address deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
+
+// PUT
+// Update Address by ID for a specific user
+router.put('/:userId/addresses/:addressId', async (req, res) => {
+    const { userId, addressId } = req.params;  // Get userId and addressId from the URL parameters
+    const { street, city, country, zipCode, isDefault } = req.body;  // Get updated data from the request body
+
+    try {
+        // Check if the user exists
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if the address exists for the given user
+        const address = await Address.findOne({
+            where: { id: addressId, userId: userId }
+        });
+
+        if (!address) {
+            return res.status(404).json({ message: 'Address not found' });
+        }
+
+        // If the new address is marked as default, ensure only one default address exists
+        if (isDefault !== undefined) {
+            if (isDefault) {
+                const defaultAddressCount = await Address.count({
+                    where: { userId, isDefault: true }
+                });
+
+                if (defaultAddressCount > 0) {
+                    return res.status(400).json({ message: 'User can have only one default address' });
+                }
+            }
+        }
+
+        // Update the address fields
+        address.street = street || address.street;
+        address.city = city || address.city;
+        address.country = country || address.country;
+        address.zipCode = zipCode || address.zipCode;
+        address.isDefault = isDefault !== undefined ? isDefault : address.isDefault;
+
+        // Save the updated address
+        await address.save();
+
+        res.json({ message: 'Address updated successfully', address });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
+
 
 module.exports = router;

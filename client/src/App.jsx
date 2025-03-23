@@ -7,7 +7,6 @@ import Navbar from './components/Navbar';
 import Login from './components/login'; 
 import Address from './pages/Address/Address_main';
 import Profileuser from "./pages/profile_user";
-import Addressform from "./pages/Address/Address_form";
 
 function App() {
   return (

@@ -1,12 +1,9 @@
 import { Box, Typography, TextField, Button } from "@mui/material";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import Sidenav_user from '../../components/Sidenav_user';
 
 function AddressFormPage({ existingAddress, onSubmit, onCancel, userData }) {
-  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
@@ -37,7 +34,7 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel, userData }) {
   }, [existingAddress]);
 
   return (
-    <Box sx={{ maxWidth: 500, mx: "auto", mt: 4, p: 3, boxShadow: 3 }}>
+    <Box sx={{ maxWidth: 500, mx: "auto", p: 3, boxShadow: 3 }}>
       <Typography variant="h5" sx={{ mb: 2 }}>
         {existingAddress ? "Edit Address" : "Add Address"}
       </Typography>

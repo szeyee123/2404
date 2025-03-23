@@ -26,34 +26,22 @@ module.exports = (sequelize, DataTypes) => {
                 }
             }
         },
-        addresses: {
-            type: DataTypes.JSON,
-            allowNull: false,
-            defaultValue: [],
-            validate: {
-                isArrayOfAddresses(value) {
-                    if (value && Array.isArray(value)) {
-                        value.forEach(address => {
-                            if (!address.street || !address.city || !address.country || !address.zipCode) {
-                                throw new Error('Each address must contain street, city, country, and zipCode');
-                            }
-                            const defaultCount = value.filter(addr => addr.isDefault).length;
-                            if (defaultCount > 1) {
-                                throw new Error('Only one address can be marked as the default address');
-                            }
-                        });
-                    }
-                }
-            }
-        },
         status: {
             type: DataTypes.ENUM("active", "blocked"),
             allowNull: false,
             defaultValue: "active"
         }
     }, {
-        tableName: 'users'
+        tableName: 'users',
     });
+
+    // Association: User has many addresses
+    User.associate = (models) => {
+        User.hasMany(models.Address, {
+            foreignKey: 'userId', 
+            onDelete: 'CASCADE'
+        });
+    };
 
     return User;
 };
