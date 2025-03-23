@@ -11,13 +11,6 @@ function Blockuserprompt({ open, closeEvent, user, setUserList }) {
       
         try {
           await http.patch(`/user/${user.id}/status`, { status: updatedStatus });
-      
-          // Update the UI state to reflect the change
-          // setUserList((prev) =>
-          //   prev.map((u) =>
-          //     u.id === user.id ? { ...u, status: updatedStatus } : u
-          //   )
-          // );
         } catch (error) {
           console.error("Error updating user status:", error);
         }
@@ -26,7 +19,7 @@ function Blockuserprompt({ open, closeEvent, user, setUserList }) {
 
   return (
     <Dialog open={open} onClose={closeEvent}>
-      <DialogTitle>Confirm Status Change</DialogTitle>
+      <DialogTitle>Confirmation needed</DialogTitle>
       <DialogContent>
         {user && (
           <DialogContentText>
