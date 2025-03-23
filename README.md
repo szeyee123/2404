@@ -27,40 +27,40 @@ git clone https://github.com/yourusername/2404.git
 2. Set Up MySQL Database
 You need to set up a MySQL database to store your data. Here's how:
     1. Log in to your MySQL server:<br>
-_        mysql -u root -p_
+        mysql -u root -p
 
     2. Create a new database in SQL:<br>
-        _CREATE DATABASE your_database_name;_
+        CREATE DATABASE your_database_name;
 
     3. Ensure the .env file in the root directory of the project to store your MySQL connection details:<br>
-_        DB_HOST=localhost<br>
+        DB_HOST=localhost<br>
         DB_USER=root<br>
         DB_PASSWORD=yourpassword<br>
-        DB_NAME=your_database_name_
+        DB_NAME=your_database_name
 
     *If you have any tables or schema to import, you can do it now (for example, by running a SQL script).
 
 3. Backend Setup (Node.js with Express.js) <br>
    **Install Backend Dependencies** <br>
     Navigate to the backend directory and install the required dependencies:<br>
-_    cd backend<br>
-    npm install<br>_
+    cd backend<br>
+    npm install<br>
     
     **Start the Backend Server** <br>
     After installing the dependencies, start the backend server:<br>
-   _ npm start_
+    npm start
 
     You should see the backend server will now be running at http://localhost:portnumberbackend.
 
 4. Frontend Setup (React.js) <br>
     **Install Frontend Dependencies** <br>
     Navigate to the frontend directory and install the required dependencies:<br>
-    _cd ../frontend <br>
-    npm install_
+    cd ../frontend <br>
+    npm install
 
     **Start the Frontend Server** <br>
     After installing the dependencies, start the frontend server: <br>
-    _npm start_
+    npm start
 
     The frontend application will now be running at http://localhost:portnumberfrontend.
 
@@ -80,28 +80,28 @@ _    cd backend<br>
     app.use(cors());
 
 ## Project Structure
-/fullstack-app <br>
-  /backend <br>
-    /node_modules <br>
-    /src <br>
-      app.js <br>
-      routes.js <br>
-      controllers <br>
-    package.json <br>
-  /frontend <br>
-    /node_modules <br>
-    /src <br>
-      /components <br>
-      /assets <br>
-    package.json <br>
-  .env <br>
-  README.md <br>
+/fullstack-app<br>
+  /backend<br>
+    /node_modules<br>
+    /src<br>
+      app.js<br>
+      routes.js<br>
+      controllers<br>
+    package.json<br>
+  /frontend<br>
+    /node_modules<br>
+    /src<br>
+      /components<br>
+      /assets<br>
+    package.json<br>
+  .env<br>
+  README.md<br>
 
-/backend: Contains the backend Node.js/Express.js code. <br>
+/backend: Contains the backend Node.js/Express.js code.
 
-/frontend: Contains the frontend React.js code. <br>
+/frontend: Contains the frontend React.js code.
 
-.env: Stores environment variables like MySQL credentials. <br>
+.env: Stores environment variables like MySQL credentials.
 
 Additional Notes
 - You can extend this application by adding more routes, endpoints, and UI features.
