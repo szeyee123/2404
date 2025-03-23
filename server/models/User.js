@@ -26,25 +26,25 @@ module.exports = (sequelize, DataTypes) => {
                 }
             }
         },
-        street: {
-            type: DataTypes.STRING(255),
-            allowNull: false
-        },
-        city: {
-            type: DataTypes.STRING(150),
-            allowNull: false
-        },
-        country: {
-            type: DataTypes.STRING(150),
-            allowNull: false
-        },
-        zipCode: {
-            type: DataTypes.STRING(10),
-            allowNull: false
-        },
-        isDefault: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
+        addresses: {
+            type: DataTypes.JSON,
+            allowNull: false,
+            defaultValue: [],
+            validate: {
+                isArrayOfAddresses(value) {
+                    if (value && Array.isArray(value)) {
+                        value.forEach(address => {
+                            if (!address.street || !address.city || !address.country || !address.zipCode) {
+                                throw new Error('Each address must contain street, city, country, and zipCode');
+                            }
+                            const defaultCount = value.filter(addr => addr.isDefault).length;
+                            if (defaultCount > 1) {
+                                throw new Error('Only one address can be marked as the default address');
+                            }
+                        });
+                    }
+                }
+            }
         },
         status: {
             type: DataTypes.ENUM("active", "blocked"),

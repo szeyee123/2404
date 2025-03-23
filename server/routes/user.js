@@ -4,20 +4,27 @@ const { User } = require('../models');
 const { Op } = require('sequelize');
 const yup = require('yup');
 
-// Create User
+// Create User with multiple addresses
 router.post('/', async (req, res) => {
     let data = req.body;
+    
+    // Validation Schema
     const validationSchema = yup.object({
         name: yup.string().trim().min(3).max(100).required(),
-        email: yup.string().trim().min(3).max(500).email().required(),
+        email: yup.string().trim().min(3).max(255).email().required(),
         number: yup.string().trim().matches(/^\d{8}$/, 'Mobile number must be exactly 8 digits').required(),
-        street: yup.string().trim().min(3).max(255).required(),
-        city: yup.string().trim().min(3).max(150).required(),
-        country: yup.string().trim().min(3).max(150).required(),
-        zipCode: yup.string().trim().min(3).max(10).required(),
-        isDefault: yup.boolean().default(false),
+        addresses: yup.array().of(
+            yup.object({
+                street: yup.string().trim().min(3).max(255).required(),
+                city: yup.string().trim().min(3).max(150).required(),
+                country: yup.string().trim().min(3).max(150).required(),
+                zipCode: yup.string().trim().min(3).max(10).required(),
+                isDefault: yup.boolean().default(false)
+            })
+        ).required(),  // Ensures the addresses field is provided as an array
         status: yup.string().oneOf(['active', 'blocked']).default('active')
     });
+
     try {
         data = await validationSchema.validate(data, { abortEarly: false });
         const result = await User.create(data);
@@ -35,10 +42,6 @@ router.get('/', async (req, res) => {
             { name: { [Op.like]: `%${search}%` } },
             { email: { [Op.like]: `%${search}%` } },
             { number: { [Op.like]: `%${search}%` } },
-            { street: { [Op.like]: `%${search}%` } },
-            { city: { [Op.like]: `%${search}%` } },
-            { country: { [Op.like]: `%${search}%` } },
-            { zipCode: { [Op.like]: `%${search}%` } },
             { status: { [Op.like]: `%${search}%` } }
         ]
     } : {};
@@ -59,14 +62,21 @@ router.put('/:id', async (req, res) => {
     const user = await User.findByPk(req.params.id);
     if (!user) return res.sendStatus(404);
 
+    // Validation Schema for update
     const validationSchema = yup.object({
         name: yup.string().trim().min(3).max(100).required(),
         email: yup.string().trim().min(3).max(500).email().required(),
         number: yup.string().trim().matches(/^\d{8}$/, 'Mobile number must be exactly 8 digits').required(),
-        street: yup.string().trim().min(3).max(255).required(),
-        city: yup.string().trim().min(3).max(150).required(),
-        country: yup.string().trim().min(3).max(150).required(),
-        zipCode: yup.string().trim().min(3).max(10).required()
+        addresses: yup.array().of(
+            yup.object({
+                street: yup.string().trim().min(3).max(255).required(),
+                city: yup.string().trim().min(3).max(150).required(),
+                country: yup.string().trim().min(3).max(150).required(),
+                zipCode: yup.string().trim().min(3).max(10).required(),
+                isDefault: yup.boolean().default(false)
+            })
+        ).required(),
+        status: yup.string().oneOf(['active', 'blocked']).default('active')
     });
 
     try {

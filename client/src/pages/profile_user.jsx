@@ -29,7 +29,7 @@ function profile_user() {
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold' , fontSize: '1.5rem'}}>Full Name:</Typography>
                   <Typography variant="body1" sx={{ fontSize: '1.4rem' }} >Sammy</Typography>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold' , fontSize: '1.5rem'}}>Email:</Typography>
-                  <Typography variant="body1" sx={{ fontSize: '1.4rem' }}>Sammy@gamil.com</Typography>
+                  <Typography variant="body1" sx={{ fontSize: '1.4rem' }}>Sammy@example.com</Typography>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold' , fontSize: '1.5rem'}}>Deafult Address:</Typography>
                   <Typography variant="body1" sx={{ fontSize: '1.4rem' }}>[ Insert Address ]</Typography>
                 </Box>

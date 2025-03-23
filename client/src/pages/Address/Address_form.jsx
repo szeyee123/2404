@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import Sidenav_user from '../../components/Sidenav_user';
 
-function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
+function AddressFormPage({ existingAddress, onSubmit, onCancel, userData }) {
   const navigate = useNavigate();
 
   const formik = useFormik({
@@ -14,12 +14,18 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
       city: existingAddress?.city || "",
       country: existingAddress?.country || "",
       zipcode: existingAddress?.zipcode || "",
+      name: userData?.name || "",
+      email: userData?.email || "",
+      number: userData?.number || ""
     },
     validationSchema: yup.object({
       street: yup.string().trim().min(3, "Street must be at least 3 characters").required("Street is required"),
       city: yup.string().trim().min(2, "City must be at least 2 characters").required("City is required"),
       country: yup.string().trim().min(2, "Country must be at least 2 characters").required("Country is required"),
       zipcode: yup.string().trim().matches(/^\d+$/, "Zip Code must be a number").required("Zip Code is required"),
+      name: yup.string().trim().required("Name is required"),
+      email: yup.string().trim().email("Invalid email format").required("Email is required"),
+      number: yup.string().trim().matches(/^\d+$/, "Mobile number must be numeric").length(8, "Mobile number must be exactly 8 digits").required("Number is required")
     }),
     onSubmit: (data) => {
       onSubmit(data); // Use the onSubmit function passed from the parent
@@ -27,7 +33,7 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
   });
 
   useEffect(() => {
-    if (existingAddress) formik.setValues(existingAddress);
+    if (existingAddress) formik.setValues({ ...formik.values, ...existingAddress });
   }, [existingAddress]);
 
   return (
@@ -37,6 +43,49 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
       </Typography>
 
       <form onSubmit={formik.handleSubmit}>
+        {/* Name Field - prefilled */}
+        <TextField
+          fullWidth
+          margin="normal"
+          label="Name"
+          name="name"
+          value={formik.values.name}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.name && Boolean(formik.errors.name)}
+          helperText={formik.touched.name && formik.errors.name}
+          disabled // Disable name field
+        />
+
+        {/* Email Field - prefilled */}
+        <TextField
+          fullWidth
+          margin="normal"
+          label="Email"
+          name="email"
+          value={formik.values.email}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.email && Boolean(formik.errors.email)}
+          helperText={formik.touched.email && formik.errors.email}
+          disabled // Disable email field
+        />
+
+        {/* Mobile Number Field - prefilled */}
+        <TextField
+          fullWidth
+          margin="normal"
+          label="Mobile Number"
+          name="number"
+          value={formik.values.number}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.number && Boolean(formik.errors.number)}
+          helperText={formik.touched.number && formik.errors.number}
+          disabled // Disable number field
+        />
+
+        {/* Address Fields - User can fill these out */}
         <TextField
           fullWidth
           margin="normal"
