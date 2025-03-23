@@ -52,8 +52,8 @@ You need to set up a MySQL database to store your data. Here's how:
 
     You should see the backend server will now be running at http://localhost:portnumberbackend.
 
-4. Frontend Setup (React.js)
-    **Install Frontend Dependencies**
+4. Frontend Setup (React.js) <br>
+    **Install Frontend Dependencies** <br>
     Navigate to the frontend directory and install the required dependencies:<br>
     cd ../frontend <br>
     npm install
@@ -64,10 +64,10 @@ You need to set up a MySQL database to store your data. Here's how:
 
     The frontend application will now be running at http://localhost:portnumberfrontend.
 
-5. Testing the Application
+5. Testing the Application <br>
     Once both the frontend and backend servers are running, open your browser and navigate to http://localhost:portnumberfrontend. You should see the frontend application connected to the backend API, which in turn is connected to the MySQL database.
 
-6. Common Issues and Troubleshooting
+6. Common Issues and Troubleshooting <br>
     MySQL Connection Issues: Double-check that your .env file is set up correctly with the right database credentials.
 
     Port Conflicts: If the ports 3000 or 5000 are already in use, you can change them in the respective configuration files (package.json for React and server.js or app.js for Express).
