@@ -1,31 +1,44 @@
-import { Box, Typography, TextField, Button } from "@mui/material";
+import { Box, Typography, TextField, Button, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel } from "@mui/material";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { useEffect } from "react";
+import axios from '../../http'; // Make sure to import axios instance with the correct base URL
 
-function AddressFormPage({ existingAddress, onSubmit, onCancel, userData }) {
-
+function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
   const formik = useFormik({
     initialValues: {
       street: existingAddress?.street || "",
       city: existingAddress?.city || "",
       country: existingAddress?.country || "",
-      zipcode: existingAddress?.zipcode || "",
-      name: userData?.name || "",
-      email: userData?.email || "",
-      number: userData?.number || ""
+      zipCode: existingAddress?.zipCode || "",
+      isDefault: existingAddress?.isDefault || false, // This will be boolean
     },
     validationSchema: yup.object({
       street: yup.string().trim().min(3, "Street must be at least 3 characters").required("Street is required"),
       city: yup.string().trim().min(2, "City must be at least 2 characters").required("City is required"),
       country: yup.string().trim().min(2, "Country must be at least 2 characters").required("Country is required"),
-      zipcode: yup.string().trim().matches(/^\d+$/, "Zip Code must be a number").required("Zip Code is required"),
-      name: yup.string().trim().required("Name is required"),
-      email: yup.string().trim().email("Invalid email format").required("Email is required"),
-      number: yup.string().trim().matches(/^\d+$/, "Mobile number must be numeric").length(8, "Mobile number must be exactly 8 digits").required("Number is required")
+      zipCode: yup.string().trim().matches(/^\d+$/, "Zip Code must be a number").required("Zip Code is required"),
     }),
-    onSubmit: (data) => {
-      onSubmit(data); // Use the onSubmit function passed from the parent
+    onSubmit: async (data) => {
+      try {
+        const addressData = {
+          ...data,
+          isDefault: data.isDefault === "true" ? true : false, // Ensure it's a boolean
+        };
+
+        const userId = 1; // Replace with the actual user ID if needed
+        // Choose the correct method (POST for adding, PUT for updating)
+        const url = existingAddress
+          ? `/user/${userId}/addresses/${existingAddress.id}` // URL for updating address, including address ID
+          : `/user/${userId}/addresses`; // URL for adding a new address, no ID needed
+
+        // Send the request to the appropriate URL
+        const response = await axios[existingAddress ? 'put' : 'post'](url, addressData);
+        console.log('API Response:', response.data);
+        onSubmit(response.data); // Handle the response
+      } catch (error) {
+        console.error('Error creating/updating address:', error);
+      }
     },
   });
 
@@ -40,48 +53,6 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel, userData }) {
       </Typography>
 
       <form onSubmit={formik.handleSubmit}>
-        {/* Name Field - prefilled */}
-        <TextField
-          fullWidth
-          margin="normal"
-          label="Name"
-          name="name"
-          value={formik.values.name}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          error={formik.touched.name && Boolean(formik.errors.name)}
-          helperText={formik.touched.name && formik.errors.name}
-          disabled // Disable name field
-        />
-
-        {/* Email Field - prefilled */}
-        <TextField
-          fullWidth
-          margin="normal"
-          label="Email"
-          name="email"
-          value={formik.values.email}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          error={formik.touched.email && Boolean(formik.errors.email)}
-          helperText={formik.touched.email && formik.errors.email}
-          disabled // Disable email field
-        />
-
-        {/* Mobile Number Field - prefilled */}
-        <TextField
-          fullWidth
-          margin="normal"
-          label="Mobile Number"
-          name="number"
-          value={formik.values.number}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          error={formik.touched.number && Boolean(formik.errors.number)}
-          helperText={formik.touched.number && formik.errors.number}
-          disabled // Disable number field
-        />
-
         {/* Address Fields - User can fill these out */}
         <TextField
           fullWidth
@@ -123,13 +94,27 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel, userData }) {
           fullWidth
           margin="normal"
           label="Zip Code"
-          name="zipcode"
-          value={formik.values.zipcode}
+          name="zipCode"
+          value={formik.values.zipCode}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          error={formik.touched.zipcode && Boolean(formik.errors.zipcode)}
-          helperText={formik.touched.zipcode && formik.errors.zipcode}
+          error={formik.touched.zipCode && Boolean(formik.errors.zipCode)}
+          helperText={formik.touched.zipCode && formik.errors.zipCode}
         />
+
+        {/* Default Address Radio Button */}
+        <FormControl component="fieldset" sx={{ mt: 2 }}>
+          <FormLabel component="legend">Set as Default Address</FormLabel>
+          <RadioGroup
+            row
+            name="isDefault"
+            value={formik.values.isDefault.toString()} // Ensure the value is string for RadioGroup
+            onChange={(e) => formik.setFieldValue("isDefault", e.target.value === "true")} // Convert to boolean
+          >
+            <FormControlLabel value="true" control={<Radio />} label="Yes" />
+            <FormControlLabel value="false" control={<Radio />} label="No" />
+          </RadioGroup>
+        </FormControl>
 
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
           <Button variant="contained" type="submit">

@@ -54,47 +54,54 @@ router.post('/', async (req, res) => {
 
 // Add New Address for an Existing User
 router.post('/:userId/addresses', async (req, res) => {
-    const { userId } = req.params;
-    const { street, city, country, zipCode, isDefault } = req.body;
-
+    const { userId } = req.params; // User ID from the request parameters
+    const { street, city, country, zipCode, isDefault } = req.body; 
+  
+    // Validation schema for the address
     const addressValidationSchema = yup.object({
         street: yup.string().trim().min(3).max(255).required(),
         city: yup.string().trim().min(3).max(150).required(),
         country: yup.string().trim().min(3).max(150).required(),
         zipCode: yup.string().trim().min(3).max(10).required(),
-        isDefault: yup.boolean().default(false)
+        isDefault: yup.boolean().default(false),
     });
-
+  
     try {
+        // Validate the request body using the address validation schema
         await addressValidationSchema.validate(req.body, { abortEarly: false });
 
+        // Check if the user exists in the database (using `userId` from the URL parameter)
         const user = await User.findByPk(userId);
         if (!user) {
+            // If the user doesn't exist, send a 404 error
             return res.status(404).json({ message: 'User not found' });
         }
-
-        // Ensure only one default address exists
+  
+        // If the address is marked as default, make sure no other address is set as default
         if (isDefault) {
-            const defaultAddressCount = await Address.count({
-                where: { userId, isDefault: true }
+            // Update the current default address to not be default
+            await Address.update({ isDefault: false }, {
+                where: {
+                    userId,
+                    isDefault: true,
+                },
             });
-
-            if (defaultAddressCount > 0) {
-                return res.status(400).json({ message: 'User can have only one default address' });
-            }
         }
-
+  
+        // Create a new address for the user in the database
         const address = await Address.create({
             street,
             city,
             country,
             zipCode,
             isDefault,
-            userId  
+            userId
         });
-
+  
+        // Send the success response with the newly created address
         res.json({ message: 'Address added successfully', address });
     } catch (err) {
+        // If there's any validation error or any other error, return the error message
         res.status(400).json({ errors: err.errors || err.message });
     }
 });
@@ -113,8 +120,8 @@ router.get('/:userId/addresses', async (req, res) => {
 
         // Find all addresses associated with the user
         const addresses = await Address.findAll({
-            where: { userId },  // Filter by userId
-            order: [['createdAt', 'DESC']]  // Optional: Order by creation date
+            where: { userId },
+            order: [['createdAt', 'DESC']]
         });
 
         // If no addresses are found
