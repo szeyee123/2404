@@ -12,9 +12,8 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
-import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import LocationCityIcon from '@mui/icons-material/LocationCity';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../appStore';
@@ -76,7 +75,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
-export default function Sidenav() {
+export default function Sidenav_user() {
   const theme = useTheme();
   // const [open, setOpen] = React.useState(true);
   const navigate = useNavigate();
@@ -142,7 +141,7 @@ export default function Sidenav() {
                 />
               </ListItemButton>
             </ListItem>
-            <ListItem disablePadding sx={{ display: 'block' }} onClick={()=>{navigate("/Address")}}>
+            <ListItem disablePadding sx={{ display: 'block' }} onClick={() => { window.location.href = '/Address'; }}>
               <ListItemButton
                 sx={[
                   {
@@ -173,7 +172,7 @@ export default function Sidenav() {
                         },
                   ]}
                 >
-                 <AccountCircleOutlinedIcon />
+                 <LocationCityIcon />
                 </ListItemIcon>
                 <ListItemText
                   primary="Address"

@@ -23,7 +23,7 @@ const Login = () => {
     if (email === "admin@gmail.com") {
       navigate("/Dashboard");
     } else if (email === "User@gmail.com") {
-      navigate("/profile");
+      navigate("/profile_user");
     } else {
       alert("Invalid credentials. Please try again.");
     }

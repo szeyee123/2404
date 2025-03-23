@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 
-function AddressDetails(address) {
+function AddressDetails({ address }) {
   return (
     <Box 
       sx={{ 

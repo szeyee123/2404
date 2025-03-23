@@ -3,8 +3,9 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import Sidenav_user from '../../components/Sidenav_user';
 
-function AddressFormPage(existingAddress) {
+function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
   const navigate = useNavigate();
 
   const formik = useFormik({
@@ -21,11 +22,7 @@ function AddressFormPage(existingAddress) {
       zipcode: yup.string().trim().matches(/^\d+$/, "Zip Code must be a number").required("Zip Code is required"),
     }),
     onSubmit: (data) => {
-      if (existingAddress) {
-        http.put(`/addresses/${existingAddress.id}`, data).then(() => navigate("/addresses"));
-      } else {
-        http.post("/addresses", data).then(() => navigate("/addresses"));
-      }
+      onSubmit(data); // Use the onSubmit function passed from the parent
     },
   });
 
@@ -88,9 +85,15 @@ function AddressFormPage(existingAddress) {
           helperText={formik.touched.zipcode && formik.errors.zipcode}
         />
 
-        <Button variant="contained" type="submit" sx={{ mt: 2 }}>
-          {existingAddress ? "Update Address" : "Add Address"}
-        </Button>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+          <Button variant="contained" type="submit">
+            {existingAddress ? "Update Address" : "Add Address"}
+          </Button>
+
+          <Button variant="outlined" onClick={onCancel} sx={{ ml: 2 }}>
+            Cancel
+          </Button>
+        </Box>
       </form>
     </Box>
   );

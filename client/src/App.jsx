@@ -20,7 +20,6 @@ function App() {
         <Route path="/Dashboard" element={<Dashboard />} />
         <Route path="/Address" element={<Address />} />
         <Route path="/profile_user" element={<Profileuser />} />
-        <Route path="/Addressform" element={<Addressform />} />
         <Route path="*" element={<h2>404 - Page Not Found</h2>} />
       </Routes>
     </BrowserRouter>

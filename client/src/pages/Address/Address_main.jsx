@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Box, Typography, Button, Tabs, Tab } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import AddressDetails from "../../components/Address_details";
 import AddressFormPage from "./Address_form";
-import Sidenav from '../../components/Sidenav_user';
+import Sidenav_user from '../../components/Sidenav_user';
 
 function AddressMain() {
   const [addresses, setAddresses] = useState([]);
@@ -34,55 +34,75 @@ function AddressMain() {
   const handleSaveAddress = async (address) => {
     try {
       if (address.id) {
-        await updateAddress(address.id, address);
+        await updateAddress(address.id, address); 
       } else {
-        await createAddress(address);
+        await createAddress(address); 
       }
       setShowForm(false);
-      await fetchAddresses(); // Refresh the address list
+      await fetchAddresses(); 
     } catch (error) {
       console.error("Error saving address:", error);
     }
   };
 
+  // Handle cancel action
+  const handleCancel = () => {
+    setShowForm(false);
+    setSelectedAddress(null);
+  };
+
   return (
-    <Box sx={{ display: "flex" }}>
-      <Sidenav />
-      <Box sx={{ p: 4, maxWidth: 600, mx: "auto", boxShadow: 3, borderRadius: 2 }}>
-        <Typography variant="h5" sx={{ mb: 2 }}>Address Management</Typography>
+    <Box className="layout-container" sx={{ display: 'flex' }}>
+      <Sidenav_user className="sidebar" />
+      <Box className="main-content" sx={{ flexGrow: 1, p: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h5">Address Management</Typography>
+          <Button
+            variant="contained"
+            onClick={handleAddAddress}
+          >
+            + Add Address
+          </Button>
+        </Box>
+        
+        {/* Table showing address list */}
+        {!showForm && (
+          <Box sx={{ width: '100%', mb: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #ddd', padding: '10px 0' }}>
+              <Typography variant="body1" sx={{ width: '33%' }}>Street</Typography>
+              <Typography variant="body1" sx={{ width: '33%' }}>City</Typography>
+              <Typography variant="body1" sx={{ width: '33%' }}>Action</Typography>
+            </Box>
 
-        {!showForm ? (
-          <>
-            <Tabs
-              value={selectedAddress ? addresses.indexOf(selectedAddress) : 0}
-              onChange={(e, index) => {
-                setSelectedAddress(addresses[index]);
-                setShowForm(false);
-              }}
-              variant="scrollable"
-              scrollButtons="auto"
-              sx={{ mb: 2 }}
-            >
-              {addresses.map((addr) => (
-                <Tab key={addr.id} label={addr.street} />
-              ))}
-            </Tabs>
-
-            {selectedAddress && <AddressDetails address={selectedAddress} />}
-
-            <Button
-              variant="contained"
-              onClick={handleAddAddress}
-              sx={{ mt: 2 }}
-            >
-              + Add Address
-            </Button>
-          </>
-        ) : (
+            {addresses.map((addr) => (
+              <Box key={addr.id} sx={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #ddd' }}>
+                <Typography sx={{ width: '33%' }}>{addr.street}</Typography>
+                <Typography sx={{ width: '33%' }}>{addr.city}</Typography>
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    setSelectedAddress(addr);
+                    setShowForm(false);
+                  }}
+                >
+                  View Details
+                </Button>
+              </Box>
+            ))}
+          </Box>
+        )}
+        
+        {showForm && (
           <AddressFormPage
             onSubmit={handleSaveAddress}
             existingAddress={selectedAddress}
+            onCancel={handleCancel} // Pass the cancel handler to the AddressFormPage component
           />
+        )}
+
+        {/* Show Address Details */}
+        {selectedAddress && !showForm && (
+          <AddressDetails address={selectedAddress} />
         )}
       </Box>
     </Box>
