@@ -4,7 +4,7 @@ import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
-const AddressFormPage = ({ existingAddress }) => {
+function AddressFormPage(existingAddress) {
   const navigate = useNavigate();
 
   const formik = useFormik({
@@ -94,6 +94,6 @@ const AddressFormPage = ({ existingAddress }) => {
       </form>
     </Box>
   );
-};
+}
 
 export default AddressFormPage;
