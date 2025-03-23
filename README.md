@@ -22,72 +22,61 @@ Before getting started, make sure you have the following installed on your machi
 ### 1. Clone the Repository
 
 Clone the repository to your local machine using the following command:
-//bash
 git clone https://github.com/yourusername/2404.git
 
 2. Set Up MySQL Database
 You need to set up a MySQL database to store your data. Here's how:
     1. Log in to your MySQL server:
-    //bash
-    mysql -u root -p
+        mysql -u root -p
 
-    2. Create a new database:
-    //sql
-    CREATE DATABASE your_database_name;
+    2. Create a new database in SQL:
+        CREATE DATABASE your_database_name;
 
     3. Ensure the .env file in the root directory of the project to store your MySQL connection details:
-    //plaintext
-    DB_HOST=localhost
-    DB_USER=root
-    DB_PASSWORD=yourpassword
-    DB_NAME=your_database_name
+        DB_HOST=localhost
+        DB_USER=root
+        DB_PASSWORD=yourpassword
+        DB_NAME=your_database_name
 
     *If you have any tables or schema to import, you can do it now (for example, by running a SQL script).
 
 3. Backend Setup (Node.js with Express.js)
     1. Install Backend Dependencies
         Navigate to the backend directory and install the required dependencies:
-        //bash
         cd backend
         npm install
         Start the Backend Server
     
         After installing the dependencies, start the backend server:
-        //bash
         npm start
 
         You should see the backend server will now be running at http://localhost:portnumberbackend.
 
 4. Frontend Setup (React.js)
-Install Frontend Dependencies
-Navigate to the frontend directory and install the required dependencies:
-//bash
-cd ../frontend
-npm install
+    Install Frontend Dependencies
+    Navigate to the frontend directory and install the required dependencies:
+    cd ../frontend
+    npm install
 
-Start the Frontend Server
-After installing the dependencies, start the frontend server:
+    Start the Frontend Server
+    After installing the dependencies, start the frontend server:
+    npm start
 
-//bash
-npm start
-The frontend application will now be running at http://localhost:portnumberfrontend.
+    The frontend application will now be running at http://localhost:portnumberfrontend.
 
 5. Testing the Application
-Once both the frontend and backend servers are running, open your browser and navigate to http://localhost:portnumberfrontend. You should see the frontend application connected to the backend API, which in turn is connected to the MySQL database.
+    Once both the frontend and backend servers are running, open your browser and navigate to http://localhost:portnumberfrontend. You should see the frontend application connected to the backend API, which in turn is connected to the MySQL database.
 
 6. Common Issues and Troubleshooting
-MySQL Connection Issues: Double-check that your .env file is set up correctly with the right database credentials.
+    MySQL Connection Issues: Double-check that your .env file is set up correctly with the right database credentials.
 
-Port Conflicts: If the ports 3000 or 5000 are already in use, you can change them in the respective configuration files (package.json for React and server.js or app.js for Express).
+    Port Conflicts: If the ports 3000 or 5000 are already in use, you can change them in the respective configuration files (package.json for React and server.js or app.js for Express).
 
-CORS Errors: If you encounter CORS issues, make sure the backend is set up to allow requests from the frontend. You can use the cors package in your Express backend:
-//bash
-npm install cors
-Then, in app.js (or your Express setup file), add:
-//js
-const cors = require('cors');
-app.use(cors());
-
+    CORS Errors: If you encounter CORS issues, make sure the backend is set up to allow requests from the frontend. You can use the cors package in your Express backend:
+    npm install cors
+    Then, in app.js (or your Express setup file), add:
+    const cors = require('cors');
+    app.use(cors());
 
 ## Project Structure
 /fullstack-app
