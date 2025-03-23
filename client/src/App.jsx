@@ -5,6 +5,7 @@ import Users from "./pages/Users";
 import Profile from "./pages/Profile";
 import Navbar from './components/Navbar';
 import Login from './components/login'; 
+import Address from './pages/Address/Address_main';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/users" element={<Users />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/Dashboard" element={<Dashboard />} />
+        <Route path="/Address" element={<Address />} />
         <Route path="*" element={<h2>404 - Page Not Found</h2>} />
       </Routes>
     </BrowserRouter>

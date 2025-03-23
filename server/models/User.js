@@ -9,35 +9,51 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             validate: {
                 isEmail: {
-                    msg: "Invalid email format" // Email validation
+                    msg: "Invalid email format"
                 }
             }
         },
         number: {
-            type: DataTypes.STRING(8), // Ensures 8 digit
+            type: DataTypes.STRING(8),
             allowNull: false,
             validate: {
                 isNumeric: {
                     msg: "Mobile number must contain only digits"
                 },
                 len: {
-                    args: [8, 8], // Ensures exactly 8 digits
+                    args: [8, 8],
                     msg: "Mobile number must be exactly 8 digits"
                 }
             }
         },
-        address: {
-            type: DataTypes.TEXT,
+        street: {
+            type: DataTypes.STRING(255),
             allowNull: false
         },
+        city: {
+            type: DataTypes.STRING(150),
+            allowNull: false
+        },
+        country: {
+            type: DataTypes.STRING(150),
+            allowNull: false
+        },
+        zipCode: {
+            type: DataTypes.STRING(10),
+            allowNull: false
+        },
+        isDefault: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        },
         status: {
-            type: DataTypes.ENUM("active", "blocked"), // Allows only "active" or "blocked"
+            type: DataTypes.ENUM("active", "blocked"),
             allowNull: false,
-            defaultValue: "active" // Default is active
+            defaultValue: "active"
         }
     }, {
         tableName: 'users'
     });
-    
+
     return User;
-}
+};

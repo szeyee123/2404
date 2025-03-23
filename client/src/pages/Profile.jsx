@@ -4,8 +4,6 @@ import Navbar from '../components/Navbar';
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
@@ -26,26 +24,20 @@ function Profile() {
             <CardContent>
               <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
                 <Avatar sx={{ width: 80, height: 80 }} src="https://via.placeholder.com/80" />
-                <Button variant="contained" component="label">
-                  Upload New Photo
-                  <input hidden accept="image/*" type="file" />
-                </Button>
               </Box>
 
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <TextField fullWidth label="Full Name" defaultValue="John Doe" />
+                  <Typography variant="subtitle1">Full Name:</Typography>
+                  <Typography variant="body1">Admin</Typography>
                 </Grid>
                 <Grid item xs={12}>
-                  <TextField fullWidth label="Email" defaultValue="johndoe@example.com" />
+                  <Typography variant="subtitle1">Email:</Typography>
+                  <Typography variant="body1">admin@gamil.com</Typography>
                 </Grid>
                 <Grid item xs={12}>
-                  <TextField fullWidth label="Bio" multiline rows={3} defaultValue="Web developer and tech enthusiast." />
-                </Grid>
-                <Grid item xs={12}>
-                  <Button variant="contained" color="primary">
-                    Save Changes
-                  </Button>
+                  <Typography variant="subtitle1">Description:</Typography>
+                  <Typography variant="body1">This is the admin account</Typography>
                 </Grid>
               </Grid>
             </CardContent>

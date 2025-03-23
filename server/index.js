@@ -20,11 +20,8 @@ app.get("/", (req, res) => {
 const userRoute = require('./routes/user');
 app.use("/user", userRoute);
 
-const addressRoutes = require('./routes/address');
-app.use('/addresses', addressRoutes);
-
 const db = require('./models');
-db.sequelize.sync({ alter: true })
+db.sequelize.sync({ alter: false })
     .then(() => {
         let port = process.env.APP_PORT;
         app.listen(port, () => {
