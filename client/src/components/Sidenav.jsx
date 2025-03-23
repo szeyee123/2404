@@ -239,7 +239,7 @@ export default function Sidenav() {
                 />
               </ListItemButton>
             </ListItem>
-            <ListItem disablePadding sx={{ display: 'block' }} onClick={()=>{navigate("/logout")}}>
+            <ListItem disablePadding sx={{ display: 'block' }} onClick={()=>{navigate("/")}}>
               <ListItemButton
                 sx={[
                   {

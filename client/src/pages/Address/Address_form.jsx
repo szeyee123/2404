@@ -1,13 +1,12 @@
-import React, { useEffect } from "react";
 import { Box, Typography, TextField, Button } from "@mui/material";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
-function AddressFormPage({ existingAddress }) {
+const AddressFormPage = ({ existingAddress }) => {
   const navigate = useNavigate();
 
-  // Formik setup for form handling and validation
   const formik = useFormik({
     initialValues: {
       street: existingAddress?.street || "",
@@ -23,23 +22,15 @@ function AddressFormPage({ existingAddress }) {
     }),
     onSubmit: (data) => {
       if (existingAddress) {
-        // Update existing address
-        http.put(`/addresses/${existingAddress.id}`, data).then(() => {
-          navigate("/addresses");
-        });
+        http.put(`/addresses/${existingAddress.id}`, data).then(() => navigate("/addresses"));
       } else {
-        // Add a new address
-        http.post("/addresses", data).then(() => {
-          navigate("/addresses");
-        });
+        http.post("/addresses", data).then(() => navigate("/addresses"));
       }
     },
   });
 
   useEffect(() => {
-    if (existingAddress) {
-      formik.setValues(existingAddress);
-    }
+    if (existingAddress) formik.setValues(existingAddress);
   }, [existingAddress]);
 
   return (
@@ -103,6 +94,6 @@ function AddressFormPage({ existingAddress }) {
       </form>
     </Box>
   );
-}
+};
 
 export default AddressFormPage;

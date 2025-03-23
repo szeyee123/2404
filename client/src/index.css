@@ -86,3 +86,20 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 } */
+
+/* login */
+.buttonlogin {
+  background-color: #6269c7;
+  color: white;
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.buttonlogin:hover {
+  background-color: #51569c;
+}
+
+/* Address */
