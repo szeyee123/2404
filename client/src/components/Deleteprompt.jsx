@@ -54,13 +54,13 @@ function Deleteprompt ({ open, closeEvent, user }) {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} variant="contained" color="primary">
+          <Button onClick={onClose} variant="outlined" color="grey">
             Cancel
           </Button>
           <Button onClick={() => {
               if (handleDelete) handleDelete(user?.id);
             }} 
-            color="error" 
+            color="primary" 
             variant="contained"
             disabled={!user}
           >

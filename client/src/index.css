@@ -33,6 +33,7 @@ body {
   display: center;
   min-height: 100vh;
   min-width: 320px;
+  background-color: #F3F4F4 !important;
 }
 
 .header {
@@ -68,9 +69,6 @@ body {
   top: 0%;
   right: 0%;
 }
-
-
-
 
 
 /* h1 {

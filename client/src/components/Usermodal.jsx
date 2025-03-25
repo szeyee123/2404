@@ -162,7 +162,7 @@ function Usermodal({ closeEvent, open, user }) {
                   sx={{ minWidth: "100%" }} />
               </Grid>
               <Grid size={12}>
-                <Typography variant="h5" align="center">
+                <Typography variant="h5" align="right">
                   <Button variant="contained" type="submit">
                     Submit
                   </Button>
