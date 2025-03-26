@@ -108,8 +108,8 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
           <RadioGroup
             row
             name="isDefault"
-            value={formik.values.isDefault.toString()} // Ensure the value is string for RadioGroup
-            onChange={(e) => formik.setFieldValue("isDefault", e.target.value === "true")} // Convert to boolean
+            value={formik.values.isDefault.toString()}
+            onChange={(e) => formik.setFieldValue("isDefault", e.target.value)} 
           >
             <FormControlLabel value="true" control={<Radio />} label="Yes" />
             <FormControlLabel value="false" control={<Radio />} label="No" />

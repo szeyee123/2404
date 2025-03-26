@@ -398,17 +398,11 @@ router.put('/:userId/addresses/:addressId', async (req, res) => {
             return res.status(404).json({ message: 'Address not found' });
         }
 
-        // If the new address is marked as default, ensure only one default address exists
-        if (isDefault !== undefined) {
-            if (isDefault) {
-                const defaultAddressCount = await Address.count({
-                    where: { userId, isDefault: true }
-                });
-
-                if (defaultAddressCount > 0) {
-                    return res.status(400).json({ message: 'User can have only one default address' });
-                }
-            }
+        // If the new address is marked as default, update other addresses to false
+        if (isDefault === true) {
+            await Address.update({ isDefault: false }, {
+                where: { userId, id: { [Op.ne]: addressId } }
+            });
         }
 
         // Update the address fields
@@ -425,7 +419,6 @@ router.put('/:userId/addresses/:addressId', async (req, res) => {
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
-    
 });
 
 module.exports = router;
