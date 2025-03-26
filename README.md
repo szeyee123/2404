@@ -7,6 +7,7 @@ This is a full-stack application using the following technologies:
 - **Database**: MySQL
 
 This README will guide you on how to set up and run the application locally.
+Do note that the current application is only for SINGAPORE only!
 
 ## Prerequisites
 
@@ -52,6 +53,9 @@ You need to set up a MySQL database to store your data. Here's how:
 
     You should see the backend server will now be running at http://localhost:portnumberbackend.
 
+    **Make sure to edit the .env file if your PORT is different**
+    ![alt text](image-1.png)
+
 4. Frontend Setup (React.js) <br>
     **Install Frontend Dependencies** <br>
     Navigate to the frontend directory and install the required dependencies:<br>
@@ -64,10 +68,16 @@ You need to set up a MySQL database to store your data. Here's how:
 
     The frontend application will now be running at http://localhost:portnumberfrontend.
 
-5. Testing the Application <br>
+5. Signup to Onemap (https://www.onemap.gov.sg/apidocs/)
+  This is so that you can get the token to ensure the address management system to work. Follow the instruction to get the token, then copy the token to the client/src/pages/Address/Address_form.jsx. See below of where to place your token, marked as [YourTokenHere].
+  ![alt text](image.png)
+
+  NOTE: Onemap only caters to SINGAPORE only!
+
+6. Testing the Application <br>
     Once both the frontend and backend servers are running, open your browser and navigate to http://localhost:portnumberfrontend. You should see the frontend application connected to the backend API, which in turn is connected to the MySQL database.
 
-6. Common Issues and Troubleshooting <br>
+7. Common Issues and Troubleshooting <br>
     MySQL Connection Issues: Double-check that your .env file is set up correctly with the right database credentials.
 
     Port Conflicts: If the ports 3000 or 5000 are already in use, you can change them in the respective configuration files (package.json for React and server.js or app.js for Express).

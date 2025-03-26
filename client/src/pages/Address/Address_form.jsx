@@ -55,7 +55,7 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
     setError(""); // Clear any previous errors
 
     try {
-      const authToken = '[mytoken]';
+      const authToken = '[eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0ZmM3YzcyNTUwZjZjYzY0NWMyZWI5NTM1Y2IzYTJiYyIsImlzcyI6Imh0dHA6Ly9pbnRlcm5hbC1hbGItb20tcHJkZXppdC1pdC1uZXctMTYzMzc5OTU0Mi5hcC1zb3V0aGVhc3QtMS5lbGIuYW1hem9uYXdzLmNvbS9hcGkvdjIvdXNlci9wYXNzd29yZCIsImlhdCI6MTc0Mjk2MzM5OSwiZXhwIjoxNzQzMjIyNTk5LCJuYmYiOjE3NDI5NjMzOTksImp0aSI6IkNKQ2xDb3BUUnprdFNuNVMiLCJ1c2VyX2lkIjo2NTQ3LCJmb3JldmVyIjpmYWxzZX0.hm0AbKbR1VtQ7VSSyQVDQh-lsATAbuIx4WyVByDiAB8]'; // Replace with your API token
       const url = `https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
       
       const response = await fetch(url, {
@@ -66,6 +66,7 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
       });
 
       const data = await response.json();
+      console.log(data);
       if (data && data.results && data.results.length > 0) {
         const address = data.results[0];
         // Set the fetched address to formik values
