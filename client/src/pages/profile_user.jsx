@@ -26,7 +26,7 @@ function ProfileUser() {
       const userId = 1;
       const response = await axios.get(`/user/${userId}/addresses`);
       const defaultAddr = response.data.find(addr => addr.isDefault === true);
-      setDefaultAddress(defaultAddr ? `${defaultAddr.street}, ${defaultAddr.zipCode}` : 'No default address found.');
+      setDefaultAddress(defaultAddr ? `${defaultAddr.street}` : 'No default address found.');
     } catch (error) {
       console.error("Error fetching user addresses:", error);
       setDefaultAddress('Error fetching address');

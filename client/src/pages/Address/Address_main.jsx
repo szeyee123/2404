@@ -96,8 +96,8 @@ function AddressMain() {
     try {
       await axios.delete(`/user/1/addresses/${addressToDelete.id}`);
       fetchUserData();
-      setShowDeleteSuccess(true); // Show success popup for delete
-      setOpenSelectDefaultDialog(false);  // Close the dialog to choose new default
+      setShowDeleteSuccess(true); 
+      setOpenSelectDefaultDialog(false);
     } catch (error) {
       console.error("Error deleting address:", error);
     }
@@ -138,7 +138,7 @@ function AddressMain() {
           <Box sx={{ width: '100%', mb: 4 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #ddd', padding: '10px 0' }}>
               <Typography variant="body1" sx={{ width: '10%' }}>#</Typography>
-              <Typography variant="body1" sx={{ width: '40%' }}>Street | Zipcode</Typography>
+              <Typography variant="body1" sx={{ width: '40%' }}>Address</Typography>
               <Typography variant="body1" sx={{ width: '35%' }}>City</Typography>
               <Typography variant="body1" sx={{ width: '30%' }}>Default</Typography>
               <Typography variant="body1" sx={{ width: '20%' }}>Action</Typography>
@@ -147,7 +147,7 @@ function AddressMain() {
             {addresses.map((addr, index) => (
               <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #ddd' }}>
                 <Typography sx={{ width: '10%' }}>{index + 1}</Typography>
-                <Typography sx={{ width: '40%' }}>{addr.street} | {addr.zipCode}</Typography>
+                <Typography sx={{ width: '40%' }}>{addr.street}</Typography>
                 <Typography sx={{ width: '35%' }}>{addr.city}</Typography>
                 <Typography sx={{ width: '30%' }}>{addr.isDefault ? "Yes" : "No"}</Typography>
                 <Box sx={{ width: '20%', display: 'flex', gap: 1 }}>

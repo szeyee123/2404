@@ -1,10 +1,15 @@
-import { Box, Typography, TextField, Button, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel } from "@mui/material";
+import { Box, Typography, TextField, Button, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel, InputAdornment } from "@mui/material";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { useEffect } from "react";
-import axios from '../../http'; 
+import { useState } from "react";
+import axios from '../../http';
+import SearchIcon from '@mui/icons-material/Search';
 
 function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
+  const [postalCode, setPostalCode] = useState("");
+  const [loading, setLoading] = useState(false); 
+  const [error, setError] = useState("");
+
   const formik = useFormik({
     initialValues: {
       street: existingAddress?.street || "",
@@ -42,16 +47,72 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
     },
   });
 
-  useEffect(() => {
-    if (existingAddress) formik.setValues({ ...formik.values, ...existingAddress });
-  }, [existingAddress]);
+  // Function to handle search by postal code
+  const handleSearchPostalCode = async () => {
+    if (!postalCode) return;
 
+    setLoading(true);
+    setError(""); // Clear any previous errors
+
+    try {
+      const authToken = '[mytoken]';
+      const url = `https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      });
+
+      const data = await response.json();
+      if (data && data.results && data.results.length > 0) {
+        const address = data.results[0];
+        // Set the fetched address to formik values
+        formik.setValues({
+          ...formik.values,
+          street: address.ADDRESS,
+          city: 'Singapore',
+          country: 'Singapore', 
+          zipCode: postalCode, 
+        });
+      } else {
+        setError("No address found for this postal code");
+      }
+    } catch (error) {
+      console.error("Error fetching address data:", error);
+      setError("Failed to fetch address data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box sx={{ maxWidth: 500, mx: "auto", p: 3, boxShadow: 3 }}>
       <Typography variant="h5" sx={{ mb: 2 }}>
         {existingAddress ? "Edit Address" : "Add Address"}
       </Typography>
+
+      {/* Search Bar for Postal Code */}
+      <TextField
+        fullWidth
+        label="Search Your Postal Code"
+        value={postalCode}
+        onChange={(e) => setPostalCode(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && handleSearchPostalCode()} // Trigger search on Enter key
+        margin="normal"
+        error={Boolean(error)}
+        helperText={error || (loading ? "Loading..." : "")}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <SearchIcon onClick={handleSearchPostalCode} style={{ cursor: 'pointer' }} /> {/* Search icon */}
+            </InputAdornment>
+          ),
+        }}
+      />
+
+      <hr></hr>
 
       <form onSubmit={formik.handleSubmit}>
         {/* Address Fields - User can fill these out */}
@@ -94,7 +155,7 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
         <TextField
           fullWidth
           margin="normal"
-          label="Zip Code"
+          label="Postal Code"
           name="zipCode"
           value={formik.values.zipCode}
           onChange={formik.handleChange}
