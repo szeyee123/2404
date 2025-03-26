@@ -85,12 +85,16 @@ function AddressMain() {
       .then(() => {
         // After setting the new default, allow deletion of the original default address
         handleDeleteConfirm();
+        
+        // Close the select default dialog and delete dialog
+        setOpenSelectDefaultDialog(false);
+        setOpenDeleteDialog(false);
       })
       .catch(error => {
         console.error("Error setting new default address:", error);
       });
   };
-
+  
   // Handle confirming address deletion
   const handleDeleteConfirm = async () => {
     try {

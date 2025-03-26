@@ -39,8 +39,6 @@ You need to set up a MySQL database to store your data. Here's how:
         DB_PASSWORD=yourpassword<br>
         DB_NAME=your_database_name
 
-    *If you have any tables or schema to import, you can do it now (for example, by running a SQL script).
-
 3. Backend Setup (Node.js with Express.js) <br>
    **Install Backend Dependencies** <br>
     Navigate to the backend directory and install the required dependencies:<br>
@@ -51,10 +49,18 @@ You need to set up a MySQL database to store your data. Here's how:
     After installing the dependencies, start the backend server:<br>
     npm start
 
-    You should see the backend server will now be running at http://localhost:portnumberbackend.
+    You should see the backend server will now be running at http://localhost:[portnumberbackend].
+    Below is the example:
+    ![alt text](image-5.png)
 
-    **Make sure to edit the .env file if your PORT is different**
-    ![alt text](image-1.png)
+    **Make sure to create the .env file under the server folder, ensure to edit the file to your PORT if it's different and make sure to generate your own encrypt key**
+    To generate you own encrypt key, in your terminal:
+    node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+    Copy that key and to replace "yourkey" with the generated key, also no quotations marks as well.
+
+    Below should be expected, the port should be [portnumberbackend]:
+    ![alt text](image-6.png)
 
 4. Frontend Setup (React.js) <br>
     **Install Frontend Dependencies** <br>
@@ -66,13 +72,17 @@ You need to set up a MySQL database to store your data. Here's how:
     After installing the dependencies, start the frontend server: <br>
     npm start
 
-    The frontend application will now be running at http://localhost:portnumberfrontend.
+    The frontend application will now be running at http://localhost:[portnumberfrontend].
+
+    **Add a .env file inside the src folder with the following:**
+    The port number should be from point 3, [portnumberbackend].
+    ![alt text](image-4.png)
 
 5. Signup to Onemap (https://www.onemap.gov.sg/apidocs/)
-  This is so that you can get the token to ensure the address management system to work. Follow the instruction to get the token, then copy the token to the client/src/pages/Address/Address_form.jsx. See below of where to place your token, marked as [YourTokenHere].
+  This is so that you can get the token to ensure the address management system to work. Click on register and follow the instruction to get the token, then copy the token to the client/src/pages/Address/Address_form.jsx. See below of where to place your token, marked as [YourTokenHere].
   ![alt text](image.png)
 
-  NOTE: Onemap only caters to SINGAPORE only!
+  NOTE: Onemap only caters to SINGAPORE address only!
 
 6. Testing the Application <br>
     Once both the frontend and backend servers are running, open your browser and navigate to http://localhost:portnumberfrontend. You should see the frontend application connected to the backend API, which in turn is connected to the MySQL database.

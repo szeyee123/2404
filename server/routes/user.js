@@ -4,6 +4,8 @@ const { User, Address } = require('../models');
 const { Sequelize, DataTypes, Op } = require('sequelize');
 const yup = require("yup");
 const moment = require('moment');
+const { encrypt, decrypt } = require('../encryption');
+
 
 // POST
 // Create User with multiple addresses
@@ -53,85 +55,6 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Add New Address for an Existing User
-router.post('/:userId/addresses', async (req, res) => {
-    const { userId } = req.params; // User ID from the request parameters
-    const { address, city, country, zipCode, isDefault } = req.body; 
-  
-    // Validation schema for the address
-    const addressValidationSchema = yup.object({
-        address: yup.string().trim().min(3).max(255).required(),
-        city: yup.string().trim().min(3).max(150).required(),
-        country: yup.string().trim().min(3).max(150).required(),
-        zipCode: yup.string().trim().min(3).max(10).required(),
-        isDefault: yup.boolean().default(false),
-    });
-  
-    try {
-        // Validate the request body using the address validation schema
-        await addressValidationSchema.validate(req.body, { abortEarly: false });
-
-        // Check if the user exists in the database (using `userId` from the URL parameter)
-        const user = await User.findByPk(userId);
-        if (!user) {
-            // If the user doesn't exist, send a 404 error
-            return res.status(404).json({ message: 'User not found' });
-        }
-  
-        // If the address is marked as default, make sure no other address is set as default
-        if (isDefault) {
-            // Update the current default address to not be default
-            await Address.update({ isDefault: false }, {
-                where: {
-                    userId,
-                    isDefault: true,
-                },
-            });
-        }
-  
-        // Create a new address for the user in the database
-        const newAddress = await Address.create({
-            address,
-            city,
-            country,
-            zipCode,
-            isDefault,
-            userId
-        });
-  
-        // Send the success response with the newly created address
-        res.json({ message: 'Address added successfully', address: newAddress });
-    } catch (err) {
-        // If there's any validation error or any other error, return the error message
-        res.status(400).json({ errors: err.errors || err.message });
-    }
-});
-
-
-// GET
-// Get All Addresses for a specific user by userId
-router.get('/:userId/addresses', async (req, res) => {
-    const { userId } = req.params;  // Get userId from the URL parameter
-
-    try {
-        // Check if the user exists
-        const user = await User.findByPk(userId);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        // Find all addresses associated with the user
-        const addresses = await Address.findAll({
-            where: { userId },
-            order: [['createdAt', 'DESC']]
-        });
-
-        // Respond with the user's addresses, even if it's an empty array
-        res.json(addresses); 
-    } catch (err) {
-        res.status(500).json({ message: 'Server error', error: err.message });
-    }
-});
 
 // Get All Users with their associated addresses
 router.get('/', async (req, res) => {
@@ -375,8 +298,9 @@ router.delete('/:userId/addresses/:addressId', async (req, res) => {
 // PUT
 // Update Address by ID for a specific user
 router.put('/:userId/addresses/:addressId', async (req, res) => {
-    const { userId, addressId } = req.params; 
-    const { address: newAddress, city, country, zipCode, isDefault } = req.body;  
+    const { userId, addressId } = req.params;
+    const { address: newAddress, city, country, zipCode, isDefault } = req.body;
+    
     try {
         // Check if the user exists
         const user = await User.findByPk(userId);
@@ -400,11 +324,11 @@ router.put('/:userId/addresses/:addressId', async (req, res) => {
             });
         }
 
-        // Update the address fields
-        address.address = newAddress || address.address; // Use 'newAddress' to avoid conflict
-        address.city = city || address.city;
-        address.country = country || address.country;
-        address.zipCode = zipCode || address.zipCode;
+        // Encrypt the fields before saving
+        address.address = newAddress ? encrypt(newAddress) : address.address; 
+        address.city = city ? encrypt(city) : address.city;
+        address.country = country ? encrypt(country) : address.country;
+        address.zipCode = zipCode ? encrypt(zipCode) : address.zipCode;
         address.isDefault = isDefault !== undefined ? isDefault : address.isDefault;
 
         // Save the updated address
@@ -415,5 +339,66 @@ router.put('/:userId/addresses/:addressId', async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
+
+// Add New Address for an Existing User
+router.post('/:userId/addresses', async (req, res) => {
+    const { userId } = req.params;
+    let { address, city, country, zipCode, isDefault } = req.body;
+
+    try {
+        // Encrypt sensitive fields
+        address = encrypt(address);
+        city = encrypt(city);
+        country = encrypt(country);
+        zipCode = encrypt(zipCode);
+
+        const newAddress = await Address.create({
+            address,
+            city,
+            country,
+            zipCode,
+            isDefault,
+            userId
+        });
+
+        res.json({ message: 'Address added successfully', address: newAddress });
+    } catch (err) {
+        res.status(400).json({ errors: err.errors || err.message });
+    }
+});
+
+// Retrieve All Addresses
+router.get('/:userId/addresses', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const addresses = await Address.findAll({
+            where: { userId },
+            order: [['createdAt', 'DESC']]
+        });
+
+        // Decrypt sensitive fields safely
+        const decryptedAddresses = addresses.map(addr => {
+            try {
+                return {
+                    ...addr.toJSON(),
+                    address: addr.address ? decrypt(addr.address) : null,
+                    city: addr.city ? decrypt(addr.city) : null,
+                    country: addr.country ? decrypt(addr.country) : null,
+                    zipCode: addr.zipCode ? decrypt(addr.zipCode) : null,
+                };
+            } catch (error) {
+                console.error("Failed to decrypt address:", error.message);
+                return addr.toJSON();
+            }
+        });
+
+        res.json(decryptedAddresses);
+    } catch (err) {
+        console.error("Server error:", err.message);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
+
 
 module.exports = router;

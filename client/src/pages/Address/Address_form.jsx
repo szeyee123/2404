@@ -10,16 +10,14 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
   const [loading, setLoading] = useState(false); 
   const [error, setError] = useState("");
   const [addresses, setAddresses] = useState([]);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [duplicateSnackbar, setDuplicateSnackbar] = useState(false); // For duplicate address alert
 
-  const [openSnackbar, setOpenSnackbar] = useState(false); 
-
-  // Calculate text field height
   const textFieldRef = useRef(null);
   const [textFieldHeight, setTextFieldHeight] = useState(56);
 
   useEffect(() => {
     if (textFieldRef.current) {
-      // Dynamically set the height of the TextField based on its current size
       setTextFieldHeight(textFieldRef.current.offsetHeight);
     }
   }, [postalCode, error, loading]);
@@ -27,7 +25,7 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
   // Fetch the list of addresses from the database
   const fetchAddresses = async () => {
     try {
-      const response = await axios.get("/user/1/addresses"); 
+      const response = await axios.get("/user/1/addresses");
       setAddresses(response.data || []);
     } catch (error) {
       console.error('Error fetching addresses:', error);
@@ -44,7 +42,7 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
       city: existingAddress?.city || "",
       country: existingAddress?.country || "",
       zipCode: existingAddress?.zipCode || "",
-      isDefault: existingAddress?.isDefault || false, 
+      isDefault: null, // Set initial value to null (no preselection)
     },
     validationSchema: yup.object({
       address: yup.string().trim().min(3, "Address must be at least 3 characters").required("Address is required"),
@@ -52,78 +50,94 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
       country: yup.string().trim().min(2, "Country must be at least 2 characters").required("Country is required"),
       zipCode: yup.string()
         .trim()
-        .matches(/^\d{6}$/, "Zip Code must be a 6-digit number") 
+        .matches(/^\d{6}$/, "Zip Code must be a 6-digit number")
         .required("Zip Code is required"),
+      isDefault: yup.boolean().required("Please select if this is your default address"),
     }),
 
     onSubmit: async (data) => {
+      // Check if the address already exists in the database
+      const duplicateAddress = addresses.find(
+        (address) =>
+          address.zipCode === data.zipCode &&
+          address.address === data.address
+      );
+
+      if (duplicateAddress) {
+        // Show the duplicate address warning popup
+        setDuplicateSnackbar(true);
+        return;
+      }
+
       try {
-        // Automatically set isDefault to true for the first address if none exist
         if (addresses.length === 0) {
-          data.isDefault = true;  
+          data.isDefault = true;
         } else {
-          data.isDefault = data.isDefault === "true"; 
+          if (data.isDefault === "true") {
+            const updateAddresses = addresses.map((address) => ({
+              ...address,
+              isDefault: false,
+            }));
+            for (const address of updateAddresses) {
+              await axios.put(`/user/1/addresses/${address.id}`, address);
+            }
+          }
         }
-    
+
         const addressData = {
           ...data,
-          isDefault: data.isDefault, 
+          isDefault: data.isDefault === "true",
         };
-    
+
         const userId = 1;
         const url = existingAddress
-          ? `/user/${userId}/addresses/${existingAddress.id}` 
+          ? `/user/${userId}/addresses/${existingAddress.id}`
           : `/user/${userId}/addresses`;
-    
-        // Send the request to the appropriate URL
+
         const response = await axios[existingAddress ? 'put' : 'post'](url, addressData);
         console.log('API Response:', response.data);
         onSubmit(response.data); 
       } catch (error) {
         console.error('Error creating/updating address:', error);
       }
-    }    
+    }
   });
 
-  // Function to handle search by postal code
   const handleSearchPostalCode = async () => {
     if (!postalCode) {
       setError("Please enter a postal code");
       return;
     }
-  
-    // Check if postal code is exactly 6 digits long before making the request
+
     if (!/^\d{6}$/.test(postalCode)) {
       setError("Postal code must be a 6-digit number");
       return; 
     }
-  
+
     setLoading(true);
     setError(""); 
-  
+
     try {
-      const authToken = '[]'; 
+      const authToken = '[]';
       const url = `https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
-  
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authToken}`,
         },
       });
-  
+
       const data = await response.json();
-      // console.log(data);
-  
+
       if (data && data.results && data.results.length > 0) {
         const address = data.results[0];
-        // Set the fetched address to formik values
         formik.setValues({
           ...formik.values,
           address: address.ADDRESS,
           city: 'Singapore',
           country: 'Singapore',
-          zipCode: postalCode, 
+          zipCode: postalCode,
         });
       } else {
         setError("No address found for this postal code");
@@ -136,25 +150,34 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
     }
   };
 
-  // Handle Cancel action with a timer-based Snackbar
   const handleCancel = () => {
     if (addresses.length === 0) {
-      setOpenSnackbar(true);  // Show the snackbar if no address exists
+      setOpenSnackbar(true);
     } else {
       onCancel();
     }
   };
 
-  // Close the Snackbar after 3 seconds (auto-close timer)
   useEffect(() => {
     if (openSnackbar) {
       const timer = setTimeout(() => {
-        setOpenSnackbar(false);  // Close the Snackbar after 3 seconds
+        setOpenSnackbar(false);
       }, 3000);
 
-      return () => clearTimeout(timer);  // Cleanup the timer on unmount
+      return () => clearTimeout(timer);
     }
   }, [openSnackbar]);
+
+  // Close duplicate address alert after 3 seconds
+  useEffect(() => {
+    if (duplicateSnackbar) {
+      const timer = setTimeout(() => {
+        setDuplicateSnackbar(false);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [duplicateSnackbar]);
 
   return (
     <Box sx={{ maxWidth: 500, mx: "auto", p: 3, boxShadow: 3 }}>
@@ -163,52 +186,50 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
       </Typography>
 
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <TextField
-        ref={textFieldRef}
-        fullWidth
-        label="Search Your Postal Code"
-        value={postalCode}
-        onChange={(e) => setPostalCode(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && handleSearchPostalCode()}
-        error={Boolean(error)}
-        helperText={error || (loading ? "Loading..." : "")}
-        sx={{
-          borderRadius: '4px 0 0 4px',
-          height: `${textFieldHeight}px`,
-          marginBottom: error ? '24px' : '0', // Add marginBottom when there's an error
-        }}
-      />
-
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#B3D9FF',
-          padding: '0 16px',
-          cursor: 'pointer',
-          borderRadius: '0 4px 4px 0',
-          height: `${textFieldHeight}px`,
-          marginBottom: error ? '24px' : '0', 
-          '&:hover': {
-            backgroundColor: '#9ABADB',
-          },
-        }}
-        onClick={handleSearchPostalCode}
-      >
-        <SearchIcon
-          style={{
-            color: 'gray',
-            transition: 'color 0.3s, transform 0.3s',
+        <TextField
+          ref={textFieldRef}
+          fullWidth
+          label="Search Your Postal Code"
+          value={postalCode}
+          onChange={(e) => setPostalCode(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearchPostalCode()}
+          error={Boolean(error)}
+          helperText={error || (loading ? "Loading..." : "")}
+          sx={{
+            borderRadius: '4px 0 0 4px',
+            height: `${textFieldHeight}px`,
+            marginBottom: error ? '24px' : '0',
           }}
         />
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#B3D9FF',
+            padding: '0 16px',
+            cursor: 'pointer',
+            borderRadius: '0 4px 4px 0',
+            height: `${textFieldHeight}px`,
+            marginBottom: error ? '24px' : '0',
+            '&:hover': {
+              backgroundColor: '#9ABADB',
+            },
+          }}
+          onClick={handleSearchPostalCode}
+        >
+          <SearchIcon
+            style={{
+              color: 'gray',
+              transition: 'color 0.3s, transform 0.3s',
+            }}
+          />
+        </Box>
       </Box>
-    </Box>
 
       <hr />
 
       <form onSubmit={formik.handleSubmit}>
-        {/* Address Fields - User can fill these out */}
         <TextField
           fullWidth
           margin="normal"
@@ -257,18 +278,22 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
           helperText={formik.touched.zipCode && formik.errors.zipCode}
         />
 
-        {/* Default Address Radio Button */}
-        <FormControl component="fieldset" sx={{ mt: 2 }}>
-          <FormLabel component="legend">Set as Default Address</FormLabel>
+        <FormControl component="fieldset" sx={{ mt: 2 }} error={formik.touched.isDefault && Boolean(formik.errors.isDefault)}>
+          <FormLabel component="legend" sx={{ color: formik.touched.isDefault && formik.errors.isDefault ? 'red' : 'inherit' }}>
+            Set as Default Address
+          </FormLabel>
           <RadioGroup
             row
             name="isDefault"
-            value={formik.values.isDefault.toString()}
+            value={formik.values.isDefault}
             onChange={(e) => formik.setFieldValue("isDefault", e.target.value)} 
           >
-            <FormControlLabel value="true" control={<Radio />} label="Yes" />
-            <FormControlLabel value="false" control={<Radio />} label="No" />
+            <FormControlLabel value={true} control={<Radio />} label="Yes" />
+            <FormControlLabel value={false} control={<Radio />} label="No" />
           </RadioGroup>
+          {formik.touched.isDefault && formik.errors.isDefault && (
+            <Typography color="error" variant="body2">{formik.errors.isDefault}</Typography>
+          )}
         </FormControl>
 
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
@@ -296,6 +321,23 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
       >
         <Alert severity="warning" >
           You need to set a default address. Please add one.
+        </Alert>
+      </Snackbar>
+
+      {/* Snackbar for duplicate address alert */}
+      <Snackbar
+        open={duplicateSnackbar}
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        style={{
+          position: 'fixed',
+          top: '50%', 
+          left: '56%', 
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        <Alert severity="error" >
+          This address already exists. Please change the address.
         </Alert>
       </Snackbar>
     </Box>
