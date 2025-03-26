@@ -2,7 +2,7 @@ import { Box, Typography, TextField, Button, Radio, RadioGroup, FormControlLabel
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { useEffect } from "react";
-import axios from '../../http'; // Make sure to import axios instance with the correct base URL
+import axios from '../../http'; 
 
 function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
   const formik = useFormik({
@@ -11,7 +11,7 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
       city: existingAddress?.city || "",
       country: existingAddress?.country || "",
       zipCode: existingAddress?.zipCode || "",
-      isDefault: existingAddress?.isDefault || false, // This will be boolean
+      isDefault: existingAddress?.isDefault || false, 
     },
     validationSchema: yup.object({
       street: yup.string().trim().min(3, "Street must be at least 3 characters").required("Street is required"),
@@ -23,19 +23,19 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
       try {
         const addressData = {
           ...data,
-          isDefault: data.isDefault === "true" ? true : false, // Ensure it's a boolean
+          isDefault: data.isDefault === "true" ? true : false, 
         };
 
-        const userId = 1; // Replace with the actual user ID if needed
-        // Choose the correct method (POST for adding, PUT for updating)
+        const userId = 1;
+
         const url = existingAddress
-          ? `/user/${userId}/addresses/${existingAddress.id}` // URL for updating address, including address ID
-          : `/user/${userId}/addresses`; // URL for adding a new address, no ID needed
+          ? `/user/${userId}/addresses/${existingAddress.id}` 
+          : `/user/${userId}/addresses`;
 
         // Send the request to the appropriate URL
         const response = await axios[existingAddress ? 'put' : 'post'](url, addressData);
         console.log('API Response:', response.data);
-        onSubmit(response.data); // Handle the response
+        onSubmit(response.data); 
       } catch (error) {
         console.error('Error creating/updating address:', error);
       }
@@ -45,6 +45,7 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
   useEffect(() => {
     if (existingAddress) formik.setValues({ ...formik.values, ...existingAddress });
   }, [existingAddress]);
+
 
   return (
     <Box sx={{ maxWidth: 500, mx: "auto", p: 3, boxShadow: 3 }}>

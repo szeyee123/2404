@@ -149,3 +149,12 @@ button:focus-visible {
   padding: 12px;
   border: 1px solid #ddd;
 }
+
+
+.editbutton:hover{
+  background-color: #87b8e93e;
+}
+
+.deletebutton:hover{
+  background-color: #f5858549;
+}

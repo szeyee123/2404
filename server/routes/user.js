@@ -349,7 +349,7 @@ router.patch("/:id/status", async (req, res) => {
 // DELETE
 // Delete Address by ID for a specific user
 router.delete('/:userId/addresses/:addressId', async (req, res) => {
-    const { userId, addressId } = req.params;  // Get userId and addressId from the URL parameters
+    const { userId, addressId } = req.params;  
 
     try {
         // Check if the user exists
@@ -379,8 +379,8 @@ router.delete('/:userId/addresses/:addressId', async (req, res) => {
 // PUT
 // Update Address by ID for a specific user
 router.put('/:userId/addresses/:addressId', async (req, res) => {
-    const { userId, addressId } = req.params;  // Get userId and addressId from the URL parameters
-    const { street, city, country, zipCode, isDefault } = req.body;  // Get updated data from the request body
+    const { userId, addressId } = req.params; 
+    const { street, city, country, zipCode, isDefault } = req.body; 
 
     try {
         // Check if the user exists
