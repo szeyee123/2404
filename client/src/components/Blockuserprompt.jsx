@@ -1,8 +1,9 @@
 import React from "react";
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Box, IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import http from "../http";
 
-function Blockuserprompt({ open, closeEvent, user, setUserList }) {
+function Blockuserprompt({ open, closeEvent, user }) {
 
     const handleBlockUser = async () => {
         closeEvent();
@@ -15,11 +16,20 @@ function Blockuserprompt({ open, closeEvent, user, setUserList }) {
           console.error("Error updating user status:", error);
         }
         
-      };
+    };
+
+    const onClose = () => {
+      closeEvent();
+      window.location.reload();
+    }; 
 
   return (
-    <Dialog open={open} onClose={closeEvent}>
+    <Dialog open={open} >
+      <Box sx={{ m: 2 }}>
       <DialogTitle>Confirmation needed</DialogTitle>
+      <IconButton className="closebutton" onClick={onClose}>
+          <CloseIcon />
+      </IconButton>
       <DialogContent>
         {user && (
           <DialogContentText>
@@ -28,13 +38,14 @@ function Blockuserprompt({ open, closeEvent, user, setUserList }) {
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={closeEvent} color="primary">
+        <Button onClick={onClose} variant="outlined" color="grey">
           Cancel
         </Button>
-        <Button onClick={handleBlockUser} color="secondary" disabled={!user}>
+        <Button onClick={handleBlockUser} variant="contained" color="primary" disabled={!user}>
           {user?.status === "active" ? "Block" : "Unblock"}
         </Button>
       </DialogActions>
+      </Box>
     </Dialog>
   );
 }
