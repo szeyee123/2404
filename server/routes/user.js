@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
         number: yup.string().trim().matches(/^\d{8}$/, 'Mobile number must be exactly 8 digits').required(),
         addresses: yup.array().of(
             yup.object({
-                street: yup.string().trim().min(3).max(255).required(),
+                address: yup.string().trim().min(3).max(255).required(),
                 city: yup.string().trim().min(3).max(150).required(),
                 country: yup.string().trim().min(3).max(150).required(),
                 zipCode: yup.string().trim().min(3).max(10).required(),
@@ -56,11 +56,11 @@ router.post('/', async (req, res) => {
 // Add New Address for an Existing User
 router.post('/:userId/addresses', async (req, res) => {
     const { userId } = req.params; // User ID from the request parameters
-    const { street, city, country, zipCode, isDefault } = req.body; 
+    const { address, city, country, zipCode, isDefault } = req.body; 
   
     // Validation schema for the address
     const addressValidationSchema = yup.object({
-        street: yup.string().trim().min(3).max(255).required(),
+        address: yup.string().trim().min(3).max(255).required(),
         city: yup.string().trim().min(3).max(150).required(),
         country: yup.string().trim().min(3).max(150).required(),
         zipCode: yup.string().trim().min(3).max(10).required(),
@@ -90,8 +90,8 @@ router.post('/:userId/addresses', async (req, res) => {
         }
   
         // Create a new address for the user in the database
-        const address = await Address.create({
-            street,
+        const newAddress = await Address.create({
+            address,
             city,
             country,
             zipCode,
@@ -100,12 +100,13 @@ router.post('/:userId/addresses', async (req, res) => {
         });
   
         // Send the success response with the newly created address
-        res.json({ message: 'Address added successfully', address });
+        res.json({ message: 'Address added successfully', address: newAddress });
     } catch (err) {
         // If there's any validation error or any other error, return the error message
         res.status(400).json({ errors: err.errors || err.message });
     }
 });
+
 
 // GET
 // Get All Addresses for a specific user by userId
@@ -125,13 +126,8 @@ router.get('/:userId/addresses', async (req, res) => {
             order: [['createdAt', 'DESC']]
         });
 
-        // If no addresses are found
-        if (addresses.length === 0) {
-            return res.status(404).json({ message: 'No addresses found for this user' });
-        }
-
-        // Respond with the user's addresses
-        res.json(addresses);
+        // Respond with the user's addresses, even if it's an empty array
+        res.json(addresses); 
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
@@ -380,8 +376,7 @@ router.delete('/:userId/addresses/:addressId', async (req, res) => {
 // Update Address by ID for a specific user
 router.put('/:userId/addresses/:addressId', async (req, res) => {
     const { userId, addressId } = req.params; 
-    const { street, city, country, zipCode, isDefault } = req.body; 
-
+    const { address: newAddress, city, country, zipCode, isDefault } = req.body;  
     try {
         // Check if the user exists
         const user = await User.findByPk(userId);
@@ -406,7 +401,7 @@ router.put('/:userId/addresses/:addressId', async (req, res) => {
         }
 
         // Update the address fields
-        address.street = street || address.street;
+        address.address = newAddress || address.address; // Use 'newAddress' to avoid conflict
         address.city = city || address.city;
         address.country = country || address.country;
         address.zipCode = zipCode || address.zipCode;

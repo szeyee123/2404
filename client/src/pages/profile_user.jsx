@@ -26,7 +26,7 @@ function ProfileUser() {
       const userId = 1;
       const response = await axios.get(`/user/${userId}/addresses`);
       const defaultAddr = response.data.find(addr => addr.isDefault === true);
-      setDefaultAddress(defaultAddr ? `${defaultAddr.street}` : 'No default address found.');
+      setDefaultAddress(defaultAddr ? `${defaultAddr.address}` : 'No address found. Please add an address.');
     } catch (error) {
       console.error("Error fetching user addresses:", error);
       setDefaultAddress('Error fetching address');
@@ -66,7 +66,11 @@ function ProfileUser() {
                     </IconButton>
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="body1" sx={{ fontSize: '1.4rem' }}>{defaultAddress} (Default)</Typography>
+                  <Typography variant="body1" sx={{ fontSize: '1.4rem' }}>
+                    {defaultAddress === 'No address found. Please add an address.'
+                      ? defaultAddress
+                      : `${defaultAddress} (default)`}
+                  </Typography>
                   </Box>
                 </Box>
               </Box>

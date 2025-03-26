@@ -134,6 +134,13 @@ function AddressMain() {
           </Box>
         )}
 
+        {/* Display message when there are no addresses */}
+        {!showForm && addresses.length === 0 && (
+          <Typography variant="body1" sx={{ mt: 3, textAlign: 'center' }}>
+            No address is found. Please enter an address.
+          </Typography>
+        )}
+
         {!showForm && addresses.length > 0 && (
           <Box sx={{ width: '100%', mb: 4 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #ddd', padding: '10px 0' }}>
@@ -147,7 +154,7 @@ function AddressMain() {
             {addresses.map((addr, index) => (
               <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #ddd' }}>
                 <Typography sx={{ width: '10%' }}>{index + 1}</Typography>
-                <Typography sx={{ width: '40%' }}>{addr.street}</Typography>
+                <Typography sx={{ width: '40%' }}>{addr.address}</Typography>
                 <Typography sx={{ width: '35%' }}>{addr.city}</Typography>
                 <Typography sx={{ width: '30%' }}>{addr.isDefault ? "Yes" : "No"}</Typography>
                 <Box sx={{ width: '20%', display: 'flex', gap: 1 }}>
@@ -249,7 +256,7 @@ function AddressMain() {
                     onClick={() => handleSelectNewDefault(addr)}
                     fullWidth
                   >
-                    {addr.street} | {addr.city}
+                    {addr.address} | {addr.city}
                   </Button>
                 ))}
             </Box>
