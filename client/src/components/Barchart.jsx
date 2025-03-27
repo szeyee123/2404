@@ -39,6 +39,16 @@ function Barchart() {
         position: 'top',
       },
     },
+    scales: {
+      y: {
+        ticks: {
+          stepSize: 1, // Ensures only whole numbers are used
+          callback: function(value) {
+            return Number.isInteger(value) ? value : null; // Hide non-integer values
+          }
+        },
+      },
+    },
   };
 
   const barLabels = ['Status'];

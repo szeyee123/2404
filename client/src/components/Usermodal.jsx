@@ -1,51 +1,68 @@
-import React, { useEffect } from 'react';
-import { IconButton, Typography, Box, TextField, Button, Modal } from '@mui/material';
+import React, { useEffect, useRef, useState } from 'react';
+import { IconButton, Typography, Box, TextField, Button, Modal, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import CloseIcon from "@mui/icons-material/Close";
 import http from '../http';
+import SearchIcon from '@mui/icons-material/Search';
 
-function Usermodal({ closeEvent, open, user }) {
+function Usermodal({ existingAddress, closeEvent, open, user }) {
+  const [postalCode, setPostalCode] = useState("");
+  const [loading, setLoading] = useState(false); 
+  const [error, setError] = useState("");
+  const [addresses, setAddresses] = useState(user?.addresses || [{ address: '', city: '', country: '', zipCode: '', isDefault: false }]);
+
+  const textFieldRef = useRef(null);
+  const [textFieldHeight, setTextFieldHeight] = useState(56);
+
+  useEffect(() => {
+    if (textFieldRef.current) {
+      setTextFieldHeight(textFieldRef.current.offsetHeight);
+    }
+  }, [postalCode, error, loading]);
 
   const formik = useFormik({
     initialValues: {
       name: user?.name || "",
       email: user?.email || "",
       number: user?.number || "",
-      address: user?.address || "",
-      status: user?.status || "active"
+      status: user?.status || "active",
+      addresses: existingAddress
+        ? [{ ...existingAddress, isDefault: null }]
+        : [],
     },
     validationSchema: yup.object({
-      name: yup.string().trim()
-        .min(3, 'Name must be at least 3 characters')
-        .max(100, 'Name must be at most 100 characters')
-        .required('Name is required'),
-      email: yup.string().trim()
-        .min(3, 'Email must be at least 3 characters')
-        .max(500, 'Email must be at most 500 characters')
-        .required('Email is required'),
-      number: yup.string()
-        .matches(/^\d+$/)
-        .length(8, "Mobile number must be 8 digits")
-        .test("len", "Mobile number must be 8 digits", (val) => val && val.toString().length === 8)
-        .required('Mobile number is required'),
-      address: yup.string().trim()
-        .min(3, 'Address must be at least 3 characters')
-        .max(500, 'Address must be at most 500 characters')
-        .required('Address is required')
+      name: yup.string().trim().min(3, 'Name must be at least 3 characters').max(100, 'Name must be at most 100 characters').required('Name is required'),
+      email: yup.string().trim().min(3, 'Email must be at least 3 characters').max(500, 'Email must be at most 500 characters').required('Email is required'),
+      number: yup.string().matches(/^\d+$/).length(8, "Mobile number must be 8 digits").required('Mobile number is required'),
+      addresses: yup.array().of(
+        yup.object({
+          address: yup.string().required('Address is required'),
+          city: yup.string().required('City is required'),
+          country: yup.string().required('Country is required'),
+          zipCode: yup.string().required('Zip code is required'),
+          isDefault: yup.boolean(),
+        })
+      ),      
     }),
     onSubmit: (data) => {
       const trimmedData = {
         name: data.name.trim(),
         email: data.email.trim(),
         number: data.number.trim(),
-        address: data.address.trim(),
-        status: data.status
+        status: data.status,
+        addresses: addresses.map(address => ({
+          address: address.address.trim(),
+          city: address.city.trim(),
+          country: address.country.trim(),
+          zipCode: address.zipCode.trim(),
+          isDefault: address.isDefault
+        })),
       };
-  
+
       if (user?.id) {
-        http.put(`/user/${user.id}`, trimmedData) //Send PUT request
+        http.put(`/user/${user.id}`, trimmedData)
           .then((res) => {
             console.log("User updated:", res.data);
             closeEvent();
@@ -55,7 +72,7 @@ function Usermodal({ closeEvent, open, user }) {
             console.error("Error updating user:", error);
           });
       } else {
-        http.post("/user", trimmedData) //Send POST request
+        http.post("/user", trimmedData)
           .then((res) => {
             console.log("User created:", res.data);
             closeEvent();
@@ -67,114 +84,239 @@ function Usermodal({ closeEvent, open, user }) {
       }
     }
   });
-  
-  // Reset form when user data changes
-  useEffect(() => {
-    if (user) {
-      formik.resetForm({ values: { ...formik.initialValues, ...user } });
-    }
-    else {
-      formik.resetForm();
-    }
-  }, [user]);
-  
+
+  const handleAddressChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedAddresses = [...addresses];
+    updatedAddresses[index][name] = value;
+    setAddresses(updatedAddresses);
+  };
+
+  // const handleAddAddress = () => {
+  //   setAddresses([...addresses, { address: '', city: '', country: '', zipCode: '', isDefault: '' }]);
+  // };
+
+  // const handleRemoveAddress = (index) => {
+  //   const updatedAddresses = addresses.filter((_, i) => i !== index);
+  //   setAddresses(updatedAddresses);
+  // };
+
   const onClose = () => {
     formik.resetForm();
     closeEvent();
     window.location.reload();
-  };  
+  };
+
+  const handleSearchPostalCode = async (index) => {
+    if (!postalCode) {
+      setError("Please enter a postal code");
+      return;
+    }
+
+    if (!/^\d{6}$/.test(postalCode)) {
+      setError("Postal code must be a 6-digit number");
+      return; 
+    }
+
+    setLoading(true);
+    setError(""); 
+
+    try {
+      const authToken = '[YOUR_AUTH_TOKEN]';
+      const url = `https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (data && data.results && data.results.length > 0) {
+        const address = data.results[0];
+        const updatedAddresses = [...addresses];
+        updatedAddresses[index] = {
+          ...updatedAddresses[index],
+          address: address.ADDRESS,
+          city: 'Singapore',
+          country: 'Singapore',
+          zipCode: postalCode,
+        };
+        setAddresses(updatedAddresses);
+      } else {
+        setError("No address found for this postal code");
+      }
+    } catch (error) {
+      console.error("Error fetching address data:", error);
+      setError("Failed to fetch address data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      formik.resetForm({ values: { ...formik.initialValues, ...user } });
+      setAddresses(user.addresses || []);
+    }
+    else {
+      formik.resetForm();
+      setAddresses([{ address: '', city: '', country: '', zipCode: '', isDefault: false }]);
+    }
+  }, [user]);
 
   return (
-    <>
-      <Modal
-        open={open}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box className="adduserModal" sx={{ m: 2 }}>
-          <Typography variant="h5" align="center">
-            {!user ? "Add" : "Edit"} User
-          </Typography>
-          <IconButton className="closebutton" onClick={onClose}>
-            <CloseIcon />
-          </IconButton>
-          <Box height="flex" component="form" sx={{ p: 2 }} onSubmit={formik.handleSubmit} >
-            <Grid container spacing={2}>
-              <Grid size={12}>
-                <TextField
-                  id="outlined-basic"
-                  label="Name"
-                  name="name"
-                  variant="outlined"
-                  size="small"
-                  value={formik.values.name}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.name && Boolean(formik.errors.name)}
-                  helperText={formik.touched.name && formik.errors.name}
-                  sx={{ minWidth: "100%" }} />
-              </Grid>
-              <Grid size={12}>
-                <TextField
-                  id="outlined-basic"
-                  label="Email"
-                  name="email"
-                  variant="outlined"
-                  size="small"
-                  value={formik.values.email}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.email && Boolean(formik.errors.email)}
-                  helperText={formik.touched.email && formik.errors.email}
-                  sx={{ minWidth: "100%" }} />
-              </Grid>
-              <Grid size={12}>
-                <TextField
-                  id="outlined-basic"
-                  label="Mobile Number"
-                  name="number"
-                  variant="outlined"
-                  size="small"
-                  type="tel"
-                  inputProps={{ inputMode: "numeric", pattern: "[0-9]*", maxLength: 8 }}
-                  value={formik.values.number}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
-                    formik.setFieldValue("number", value); // Update only with numbers
-                  }}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.number && Boolean(formik.errors.number)}
-                  helperText={formik.touched.number && formik.errors.number}
-                  sx={{ minWidth: "100%" }} />
-              </Grid>
-              <Grid size={12}>
-                <TextField
-                  id="outlined-basic"
-                  label="Address"
-                  name="address"
-                  variant="outlined"
-                  size="small"
-                  value={formik.values.address}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.address && Boolean(formik.errors.address)}
-                  helperText={formik.touched.address && formik.errors.address}
-                  sx={{ minWidth: "100%" }} />
-              </Grid>
-              <Grid size={12}>
-                <Typography variant="h5" align="right">
-                  <Button variant="contained" type="submit">
-                    Submit
-                  </Button>
-                </Typography>
-              </Grid>
+    <Modal open={open} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
+      <Box className="adduserModal" sx={{ m: 2 , maxHeight: '90vh', overflowY: 'auto' }}>
+        <Typography variant="h5" align="center">
+          {!user ? "Add" : "Edit"} User
+        </Typography>
+        <IconButton className="closebutton" onClick={onClose}>
+          <CloseIcon />
+        </IconButton>
+        <form onSubmit={formik.handleSubmit}>
+          <Grid container spacing={2}>
+            <Grid size={12}>
+              <TextField
+                label="Name"
+                name="name"
+                variant="outlined"
+                size="small"
+                value={formik.values.name}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+                helperText={formik.touched.name && formik.errors.name}
+                sx={{ minWidth: "100%" }} />
             </Grid>
-          </Box>
-        </Box>
-      </Modal>
-    </>
-  )
+            <Grid size={12}>
+              <TextField
+                label="Email"
+                name="email"
+                variant="outlined"
+                size="small"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.email && Boolean(formik.errors.email)}
+                helperText={formik.touched.email && formik.errors.email}
+                sx={{ minWidth: "100%" }} />
+            </Grid>
+            <Grid size={12}>
+              <TextField
+                label="Mobile Number"
+                name="number"
+                variant="outlined"
+                size="small"
+                type="tel"
+                value={formik.values.number}
+                inputProps={{ inputMode: "numeric", pattern: "[0-9]*", maxLength: 8 }}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.number && Boolean(formik.errors.number)}
+                helperText={formik.touched.number && formik.errors.number}
+                sx={{ minWidth: "100%" }} />
+            </Grid>
+            <Grid size={12}>
+              {addresses.map((address, index) => (
+                <Box key={index} sx={{ mb: 2 }}>
+                  <Typography variant="h6">Address {index + 1}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <TextField
+                      ref={textFieldRef}
+                      fullWidth
+                      label="Search Your Postal Code"
+                      value={postalCode}
+                      onChange={(e) => setPostalCode(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSearchPostalCode(index)}
+                      error={Boolean(error)}
+                      helperText={error || (loading ? "Loading..." : "")}
+                      sx={{ borderRadius: '4px 0 0 4px', height: `${textFieldHeight}px` }}
+                    />
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: '#B3D9FF',
+                        padding: '0 16px',
+                        cursor: 'pointer',
+                        borderRadius: '0 4px 4px 0',
+                        height: `${textFieldHeight}px`,
+                        '&:hover': { backgroundColor: '#9ABADB' },
+                      }}
+                      onClick={() => handleSearchPostalCode(index)}
+                    >
+                      <SearchIcon />
+                    </Box>
+                  </Box>
+                  <hr />
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    label="Address"
+                    name={`addresses[${index}].address`}
+                    value={address.address}
+                    onChange={(e) => handleAddressChange(index, e)}
+                  />
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    label="City"
+                    name={`addresses[${index}].city`}
+                    value={address.city}
+                    onChange={(e) => handleAddressChange(index, e)}
+                  />
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    label="Country"
+                    name={`addresses[${index}].country`}
+                    value={address.country}
+                    onChange={(e) => handleAddressChange(index, e)}
+                  />
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    label="Postal Code"
+                    name={`addresses[${index}].zipCode`}
+                    value={address.zipCode}
+                    onChange={(e) => handleAddressChange(index, e)}
+                  />
+                  <FormControl component="fieldset" sx={{ mt: 2 }} error={formik.touched.isDefault && Boolean(formik.errors.isDefault)}>
+                    <FormLabel component="legend" sx={{ color: formik.touched.isDefault && formik.errors.isDefault ? 'red' : 'inherit' }}>
+                      Set as Default Address
+                    </FormLabel>
+                    <RadioGroup
+                      row
+                      name={`addresses[${index}].isDefault`}  // Make sure this is for the specific address
+                      value={address.isDefault}  // Use the individual address's `isDefault` value
+                      onChange={(e) => {
+                        const updatedAddresses = [...addresses];
+                        updatedAddresses[index].isDefault = e.target.value === 'true';  // Set it as boolean
+                        setAddresses(updatedAddresses);  // Update the state with the new address list
+                      }}
+                    >
+                      <FormControlLabel value={true} control={<Radio />} label="Yes" />
+                      <FormControlLabel value={false} control={<Radio />} label="No" />
+                    </RadioGroup>
+                  </FormControl>
+
+                </Box>
+              ))}
+            </Grid>
+            <Grid size={12}>
+              <Button variant="contained" type="submit" fullWidth>
+                Submit
+              </Button>
+            </Grid>
+          </Grid>
+        </form>
+      </Box>
+    </Modal>
+  );
 }
 
-
-export default Usermodal
+export default Usermodal;

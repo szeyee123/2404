@@ -118,7 +118,7 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
     setError(""); 
 
     try {
-      const authToken = '[]';
+      const authToken = '[eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vaW50ZXJuYWwtYWxiLW9tLXByZGV6aXQtaXQtbmV3LTE2MzM3OTk1NDIuYXAtc291dGhlYXN0LTEuZWxiLmFtYXpvbmF3cy5jb20vYXBpL3YyL3VzZXIvcGFzc3dvcmQiLCJpYXQiOjE3NDI5OTQ1MTAsImV4cCI6MTc0MzI1MzcxMCwibmJmIjoxNzQyOTk0NTEwLCJqdGkiOiJnOWtIUEVYZ0IwN1J3ZGUyIiwic3ViIjoiMTc5YjYwNDljYWU5OWJmNWJhYmUzMGZmMzAyOTZiYzMiLCJ1c2VyX2lkIjo2NTUxLCJmb3JldmVyIjpmYWxzZX0.AkJzuBS4_t1YPSySqTpHqLb3ZSB8FjzhU63XPXZkftM]';
       const url = `https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
 
       const response = await fetch(url, {

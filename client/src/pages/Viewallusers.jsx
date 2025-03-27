@@ -16,49 +16,15 @@ import MenuItem from '@mui/material/MenuItem';
 import Chip from '@mui/material/Chip';
 
 const columns = [
-  {
-    id: 'id',
-    label: 'User ID',
-    minWidth: 170
-  },
-  {
-    id: 'name',
-    label: 'Name',
-    minWidth: 100
-  },
-  {
-    id: 'number',
-    label: 'Mobile number',
-    minWidth: 170,
-    align: 'right',
-  },
-  {
-    id: 'address',
-    label: 'Address',
-    minWidth: 170,
-    align: 'right',
-  },
-  {
-    id: 'status',
-    label: 'Status',
-    minWidth: 100,
-    align: 'center',
-  },
-  {
-    id: 'updatedAt',
-    label: 'Updated at',
-    minWidth: 170,
-    align: 'right',
-    format: (value) => new Date(value).toLocaleString(),
-  },
-  {
-    id: 'createdAt',
-    label: 'Created at',
-    minWidth: 170,
-    align: 'right',
-    format: (value) => new Date(value).toLocaleString(),
-  },
+  { id: 'id', label: 'User ID', minWidth: 170, align: 'left' }, 
+  { id: 'name', label: 'Name', minWidth: 100, align: 'left' }, 
+  { id: 'number', label: 'Mobile number', minWidth: 170, align: 'left' }, 
+  { id: 'addresses', label: 'Default Address', minWidth: 170, align: 'left' }, 
+  { id: 'status', label: 'Status', minWidth: 100, align: 'center' }, 
+  { id: 'updatedAt', label: 'Updated at', minWidth: 170, align: 'left', format: (value) => new Date(value).toLocaleString() }, 
+  { id: 'createdAt', label: 'Created at', minWidth: 170, align: 'left', format: (value) => new Date(value).toLocaleString() }
 ];
+
 
 export default function Viewallusers({ openEditModal, openDeleteModal, openBlockUserModal, user, setUser }) {
   const [userList, setUserList] = useState([]);
@@ -125,40 +91,57 @@ export default function Viewallusers({ openEditModal, openDeleteModal, openBlock
             </TableRow>
           </TableHead>
           <TableBody>
-            {userList
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((user) => {
-                return (
-                  <TableRow hover tabIndex={-1} key={user.id}>
-                    {columns.map((column) => {
-                      const value = user[column.id];
-                      if (column.id === "status") {
-                        return (
-                          <TableCell key={column.id} align={column.align}>
-                            <Chip
-                              label={value}
-                              color={value === "active" ? "success" : "error"}
-                              variant="outlined"
-                              sx={{ fontWeight: "bold" }}
-                            />
-                          </TableCell>
-                        );
-                      }
+            {userList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((user) => {
+              // Get the default address
+              const defaultAddress = Array.isArray(user.Addresses)
+                ? user.Addresses.find((address) => address.isDefault)
+                : null;
+              
+                console.log("User Addresses:", user.Addresses);
+
+
+              return (
+                <TableRow hover tabIndex={-1} key={user.id}>
+                  {columns.map((column) => {
+                    let value;
+
+                    if (column.id === 'addresses') {
+                      value = defaultAddress
+                        ? `${defaultAddress.address}, ${defaultAddress.city}, ${defaultAddress.country}, ${defaultAddress.zipCode}`
+                        : 'No default address';
+                    } else {
+                      value = user[column.id];
+                    }
+
+                    if (column.id === "status") {
                       return (
                         <TableCell key={column.id} align={column.align}>
-                          {column.format && value
-                            ? column.format(value)
-                            : value}
+                          <Chip
+                            label={value}
+                            color={value === "active" ? "success" : "error"}
+                            variant="outlined"
+                            sx={{ fontWeight: "bold" }}
+                          />
                         </TableCell>
                       );
-                    })}
+                    }
+
+                    return (
+                      <TableCell key={column.id} align={column.align}>
+                        {column.format && value ? column.format(value) : value}
+                      </TableCell>
+                    );
+                  })}
+                  <TableCell align="right">
                     <IconButton aria-label="Actions" onClick={(event) => handleMenuOpen(event, user)}>
                       <MoreVertIcon />
                     </IconButton>
-                  </TableRow>
-                );
-              })}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
+
         </Table>
       </TableContainer>
       <TablePagination
