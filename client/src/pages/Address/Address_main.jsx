@@ -24,7 +24,7 @@ function AddressMain() {
   // Fetch user data and addresses
   const fetchUserData = async () => {
     try {
-      const userId = 1;
+      const userId = 2;
       const response = await axios.get(`/user/${userId}/addresses`);
       setAddresses(response.data);
       // console.log(response.data);
@@ -56,7 +56,7 @@ function AddressMain() {
 
     // Proceed with deletion if it's not a default address
     try {
-      await axios.delete(`/user/1/addresses/${addressToDelete.id}`);
+      await axios.delete(`/user/2/addresses/${addressToDelete.id}`);
       fetchUserData();
       setShowDeleteSuccess(true);
       setOpenDeleteDialog(false);
@@ -81,7 +81,7 @@ function AddressMain() {
   // Handle selecting a new default address
   const handleSelectNewDefault = (newDefaultAddress) => {
     // Set the new default address via an API call
-    axios.put(`/user/1/addresses/${newDefaultAddress.id}`, { isDefault: true })
+    axios.put(`/user/2/addresses/${newDefaultAddress.id}`, { isDefault: true })
       .then(() => {
         // After setting the new default, allow deletion of the original default address
         handleDeleteConfirm();
@@ -98,7 +98,7 @@ function AddressMain() {
   // Handle confirming address deletion
   const handleDeleteConfirm = async () => {
     try {
-      await axios.delete(`/user/1/addresses/${addressToDelete.id}`);
+      await axios.delete(`/user/2/addresses/${addressToDelete.id}`);
       fetchUserData();
       setShowDeleteSuccess(true); 
       setOpenSelectDefaultDialog(false);

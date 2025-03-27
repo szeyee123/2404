@@ -8,6 +8,7 @@ import Barchart from '../components/Barchart';
 import Linechart from '../components/Linechart';
 import Doughnutchart from '../components/Doughnutchart';
 import { Card, CardContent, TableContainer, Table, TableBody, TableHead, TableRow, TableCell } from '@mui/material';
+import DashboardMap from '../components/Dashboardmap';
 
 function Dashboard() {
    const [totalUsers, setTotalUsers] = useState(0);
@@ -103,6 +104,13 @@ function Dashboard() {
               <Card sx={{ flex: 1, display: "flex", flexDirection: "column", height: "100%" }}>
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Doughnutchart />
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid size={12} sx={{ display: "flex" }}>
+              <Card sx={{ flex: 1, display: "flex", flexDirection: "column", height: "100%" }}>
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <DashboardMap />
                 </CardContent>
               </Card>
             </Grid>

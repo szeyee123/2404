@@ -5,7 +5,51 @@ const { Sequelize, DataTypes, Op } = require('sequelize');
 const yup = require("yup");
 const moment = require('moment');
 const { encrypt, decrypt } = require('../encryption');
+const axios = require('axios')
 
+const getCoordinates = async (zipCode) => {
+    const authToken = '[eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vaW50ZXJuYWwtYWxiLW9tLXByZGV6aXQtaXQtbmV3LTE2MzM3OTk1NDIuYXAtc291dGhlYXN0LTEuZWxiLmFtYXpvbmF3cy5jb20vYXBpL3YyL3VzZXIvcGFzc3dvcmQiLCJpYXQiOjE3NDI5OTQ1MTAsImV4cCI6MTc0MzI1MzcxMCwibmJmIjoxNzQyOTk0NTEwLCJqdGkiOiJnOWtIUEVYZ0IwN1J3ZGUyIiwic3ViIjoiMTc5YjYwNDljYWU5OWJmNWJhYmUzMGZmMzAyOTZiYzMiLCJ1c2VyX2lkIjo2NTUxLCJmb3JldmVyIjpmYWxzZX0.AkJzuBS4_t1YPSySqTpHqLb3ZSB8FjzhU63XPXZkftM]';
+
+    try {
+        const response = await axios.get(
+            `https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${zipCode}&returnGeom=Y&getAddrDetails=Y`, {
+            headers: {
+                Authorization: authToken, // Replace 'your_token_here' with your actual token
+            }
+        }
+        );
+        if (response.status === 200) {
+            if (response.data.results.length > 0) {
+                return {
+                    zipCode,
+                    lat: parseFloat(response.data.results[0].LATITUDE),
+                    lon: parseFloat(response.data.results[0].LONGITUDE)
+                };
+            } 
+        }
+    } catch (error) {
+        console.error(`Error fetching coordinates for ${zipCode}:`, error);
+    }
+};
+
+// Route to get geocoded addresses
+router.get("/geocode", async (req, res) => {
+    try {
+        // Assuming you want to fetch addresses from the Address model
+        const addresses = await Address.findAll({
+            attributes: ['zipCode'] // Retrieve only the address field
+        });
+
+        // Map through the retrieved addresses and get coordinates
+        const geoData = await Promise.all(addresses.map(address => getCoordinates(address.zipCode)));
+
+        // Send back the geocoded data
+        res.json(geoData.filter(data => data));
+    } catch (error) {
+        console.error("Error fetching addresses:", error);
+        res.status(500).json({ error: "Error fetching addresses" });
+    }
+});
 
 // POST
 // Create User with multiple addresses
@@ -45,7 +89,7 @@ router.post('/', async (req, res) => {
             data.addresses.map(address => {
                 return Address.create({
                     ...address,
-                    userId: user.id 
+                    userId: user.id
                 });
             })
         );
@@ -151,10 +195,10 @@ router.get("/pastSignUps", async (req, res) => {
             [Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), '%Y-%m'), 'month'],
             [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
         ],
-        where: { 
-            createdAt: { 
+        where: {
+            createdAt: {
                 [Op.between]: [startOfLast12Months, now] // From 12 months ago to today
-            } 
+            }
         },
         group: ['month'],
         order: [['month', 'ASC']]
@@ -171,6 +215,8 @@ router.get("/pastSignUps", async (req, res) => {
 
     res.json(finalData);
 });
+
+
 
 router.get("/:id", async (req, res) => {
     let id = req.params.id;
@@ -196,7 +242,7 @@ router.put("/:id", async (req, res) => {
     let validationSchema = yup.object({
         name: yup.string().trim().min(3).max(100).required(),
         email: yup.string().trim().min(3).max(500).email().required(),
-        number: yup.string().trim().matches(/^\d{8}$/,"Mobile number must be exactly 8 digits").required(),
+        number: yup.string().trim().matches(/^\d{8}$/, "Mobile number must be exactly 8 digits").required(),
         addresses: yup.array().of(
             yup.object({
                 address: yup.string().trim().min(3).max(255).required(),
@@ -214,12 +260,12 @@ router.put("/:id", async (req, res) => {
         let num = await User.update(data, {
             where: { id: id }
         });
-        
+
         if (num == 1) {
             res.json({ message: "User updated successfully." });
         } else {
             res.status(400).json({ message: `Cannot update user with id ${id}.` });
-        }        
+        }
 
         // if (!address) {
         //     return res.status(404).json({ message: 'Address not found' });
@@ -260,30 +306,30 @@ router.delete("/:id", async (req, res) => {
 router.patch("/:id/status", async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
-  
+
     if (!["active", "blocked"].includes(status)) {
-      return res.status(400).json({ message: "Invalid status" });
+        return res.status(400).json({ message: "Invalid status" });
     }
-  
+
     try {
-      const user = await User.findByPk(id);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-  
-      user.status = status;
-      await user.save();
-  
-      res.json({ message: `User ${id} updated to ${status}`, user });
+        const user = await User.findByPk(id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        user.status = status;
+        await user.save();
+
+        res.json({ message: `User ${id} updated to ${status}`, user });
     } catch (err) {
-      res.status(500).json({ message: "Database error", error: err });
+        res.status(500).json({ message: "Database error", error: err });
     }
 });
 
 // DELETE
 // Delete Address by ID for a specific user
 router.delete('/:userId/addresses/:addressId', async (req, res) => {
-    const { userId, addressId } = req.params;  
+    const { userId, addressId } = req.params;
 
     try {
         // Check if the user exists
@@ -315,7 +361,7 @@ router.delete('/:userId/addresses/:addressId', async (req, res) => {
 router.put('/:userId/addresses/:addressId', async (req, res) => {
     const { userId, addressId } = req.params;
     const { address: newAddress, city, country, zipCode, isDefault } = req.body;
-    
+
     try {
         // Check if the user exists
         const user = await User.findByPk(userId);
@@ -340,7 +386,7 @@ router.put('/:userId/addresses/:addressId', async (req, res) => {
         }
 
         // Encrypt the fields before saving
-        address.address = newAddress ? encrypt(newAddress) : address.address; 
+        address.address = newAddress ? encrypt(newAddress) : address.address;
         address.city = city ? encrypt(city) : address.city;
         address.country = country ? encrypt(country) : address.country;
         address.zipCode = zipCode ? encrypt(zipCode) : address.zipCode;
