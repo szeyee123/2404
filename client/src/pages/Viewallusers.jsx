@@ -1,19 +1,8 @@
 import * as React from 'react';
-import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
+import { IconButton, Menu, MenuItem, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Paper } from '@mui/material';
 import http from '../http';
 import { useEffect, useState } from 'react';
-import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Chip from '@mui/material/Chip';
 
 const columns = [
   { id: 'id', label: 'User ID', minWidth: 170, align: 'left' }, 
@@ -24,7 +13,6 @@ const columns = [
   { id: 'updatedAt', label: 'Updated at', minWidth: 170, align: 'left', format: (value) => new Date(value).toLocaleString() }, 
   { id: 'createdAt', label: 'Created at', minWidth: 170, align: 'left', format: (value) => new Date(value).toLocaleString() }
 ];
-
 
 export default function Viewallusers({ openEditModal, openDeleteModal, openBlockUserModal, user, setUser }) {
   const [userList, setUserList] = useState([]);
@@ -75,7 +63,7 @@ export default function Viewallusers({ openEditModal, openDeleteModal, openBlock
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: "16px" }}>
-      <TableContainer sx={{ maxHeight: 650, }}>
+      <TableContainer sx={{ maxHeight: 650 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead sx={{ width: '100%', }}>
             <TableRow>

@@ -46,7 +46,7 @@ export default function Users() {
       <Box height={30} />
       <Box sx={{ display: "flex" }}>
         <Sidenav />
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Box component="main" sx={{  flexGrow: 1, p: 3 , overflow: 'hidden' }}>
           <div className="header">
             <h1>View all users</h1>
             <Button variant="contained" onClick={handleAddNewUser} >Add new user</Button>

@@ -47,9 +47,6 @@ function Deleteprompt ({ open, closeEvent, user }) {
               <DialogContentText>
                 <b>Mobile number:</b> {user.number}
               </DialogContentText>
-              <DialogContentText>
-                <b>Address:</b> {user.address}
-              </DialogContentText>
             </>
           )}
         </DialogContent>
