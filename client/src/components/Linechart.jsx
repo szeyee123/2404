@@ -28,10 +28,6 @@ const options = {
     legend: {
       position: 'top',
     },
-    title: {
-      display: true,
-      text: 'Recent User Signups in a year',
-    },
   },
   scales: {
     y: {
@@ -78,6 +74,9 @@ function Linechart() {
 
   return (
     <>
+      <h5 style={{ textAlign: 'center', marginBottom: '10px', color: 'black' }}>
+        Recent User Signups in a year
+      </h5>
       {<Line options={options} data={lineData}/> }
     </>
   )

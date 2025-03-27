@@ -25,10 +25,6 @@ function Doughnutchart() {
       });
   }, []);
 
-  if (numActive === null || numBlocked === null) {
-    return <p>Loading chart...</p>;
-  }
-
   const totalUsers = numActive + numBlocked;
   const activePercentage = totalUsers > 0 ? ((numActive / totalUsers) * 100).toFixed(1) : '0.0';
 

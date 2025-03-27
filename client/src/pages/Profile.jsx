@@ -33,7 +33,7 @@ function Profile() {
                 </Grid>
                 <Grid item xs={12}>
                   <Typography variant="subtitle1">Email:</Typography>
-                  <Typography variant="body1">admin@gamil.com</Typography>
+                  <Typography variant="body1">admin@gmail.com</Typography>
                 </Grid>
                 <Grid item xs={12}>
                   <Typography variant="subtitle1">Description:</Typography>

@@ -11,6 +11,7 @@ const { encrypt, decrypt } = require('../encryption');
 // Create User with multiple addresses
 router.post('/', async (req, res) => {
     let data = req.body;
+    console.log(data)
 
     const validationSchema = yup.object({
         name: yup.string().trim().min(3).max(100).required(),
@@ -196,7 +197,15 @@ router.put("/:id", async (req, res) => {
         name: yup.string().trim().min(3).max(100).required(),
         email: yup.string().trim().min(3).max(500).email().required(),
         number: yup.string().trim().matches(/^\d{8}$/,"Mobile number must be exactly 8 digits").required(),
-        address: yup.string().trim().min(3).max(500).required()
+        addresses: yup.array().of(
+            yup.object({
+                address: yup.string().trim().min(3).max(255).required(),
+                city: yup.string().trim().min(3).max(150).required(),
+                country: yup.string().trim().min(3).max(150).required(),
+                zipCode: yup.string().trim().min(3).max(10).required(),
+                isDefault: yup.boolean().default(false)
+            })
+        ).required(),
     });
     try {
         data = await validationSchema.validate(data,
@@ -205,15 +214,21 @@ router.put("/:id", async (req, res) => {
         let num = await User.update(data, {
             where: { id: id }
         });
+        
+        if (num == 1) {
+            res.json({ message: "User updated successfully." });
+        } else {
+            res.status(400).json({ message: `Cannot update user with id ${id}.` });
+        }        
 
-        if (!address) {
-            return res.status(404).json({ message: 'Address not found' });
-        }
+        // if (!address) {
+        //     return res.status(404).json({ message: 'Address not found' });
+        // }
 
-        // Delete the address
-        await address.destroy();
+        // // Delete the address
+        // await address.destroy();
 
-        res.json({ message: 'Address deleted successfully' });
+        // res.json({ message: 'Address deleted successfully' });
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
