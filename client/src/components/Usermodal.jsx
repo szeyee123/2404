@@ -163,7 +163,7 @@ function Usermodal({ existingAddress, closeEvent, open, user }) {
     }
     else {
       formik.resetForm();
-      setAddresses([{ address: '', city: '', country: '', zipCode: '', isDefault: false }]);
+      setAddresses([{ address: '', city: '', country: '', zipCode: '', isDefault: true }]);
     }
   }, [user]);
 
@@ -300,7 +300,6 @@ function Usermodal({ existingAddress, closeEvent, open, user }) {
                       }}
                     >
                       <FormControlLabel value={true} control={<Radio />} label="Yes" />
-                      <FormControlLabel value={false} control={<Radio />} label="No" />
                     </RadioGroup>
                   </FormControl>
 

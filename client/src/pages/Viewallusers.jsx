@@ -5,13 +5,14 @@ import { useEffect, useState } from 'react';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 const columns = [
-  { id: 'id', label: 'User ID', minWidth: 170, align: 'left' }, 
+  { id: 'id', label: 'User ID', minWidth: 85, align: 'left' }, 
   { id: 'name', label: 'Name', minWidth: 100, align: 'left' }, 
-  { id: 'number', label: 'Mobile number', minWidth: 170, align: 'left' }, 
+  { id: 'email', label: 'Email', minWidth: 100, align: 'left' }, 
+  { id: 'number', label: 'Mobile number', minWidth: 130, align: 'left' }, 
   { id: 'addresses', label: 'Default Address', minWidth: 170, align: 'left' }, 
   { id: 'status', label: 'Status', minWidth: 100, align: 'center' }, 
-  { id: 'updatedAt', label: 'Updated at', minWidth: 170, align: 'left', format: (value) => new Date(value).toLocaleString() }, 
-  { id: 'createdAt', label: 'Created at', minWidth: 170, align: 'left', format: (value) => new Date(value).toLocaleString() }
+  { id: 'updatedAt', label: 'Updated at', minWidth: 150, align: 'left', format: (value) => new Date(value).toLocaleString() }, 
+  { id: 'createdAt', label: 'Created at', minWidth: 150, align: 'left', format: (value) => new Date(value).toLocaleString() }
 ];
 
 export default function Viewallusers({ openEditModal, openDeleteModal, openBlockUserModal, user, setUser }) {

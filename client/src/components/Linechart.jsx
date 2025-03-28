@@ -31,6 +31,7 @@ const options = {
   },
   scales: {
     y: {
+      beginAtZero: true,
       ticks: {
         stepSize: 1, // Ensures only whole numbers are used
         callback: function(value) {

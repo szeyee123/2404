@@ -68,7 +68,7 @@ function Doughnutchart() {
   
       ctx.save(); // Save canvas state
   
-      const fontSize = Math.min(height / 15, 20); // Adjust max font size
+      const fontSize = Math.min(height / 20, 16); // Adjust max font size
       ctx.font = `${fontSize}px Arial`;
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'center';
