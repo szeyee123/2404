@@ -1,5 +1,43 @@
 ===== Contribution ===== <br>
 **Sze Yee**
+Module: Admin User Management Dashboard
+
+1. Backend Development (Express.js & MySQL)
+- Designed a MySQL database schema with the users table, including fields: id, name, email, number, status (active or blocked), createdAt, updatedAt
+- Developed APIs for:
+	1. User CRUD operations
+	2. Block/Unblock Users
+	3. User Statistics
+	4. Get longtitude and langtitude from address
+
+2. Postman API Testing
+- Created a Postman collection to test all API endpoints, covering:
+	1. User CRUD operations and validation.
+	2. Testing API responses with different status codes (200, 201, 400, 401, 404, 500).
+
+3. Frontend Development (React.js, Axios, Chart.js & Leaflet.js)
+- Built a React-based admin panel with:
+	1. User Management Table – Displays users with actions to edit, delete, or block/unblock.
+    2. Added address fields in
+	3. Modal Forms – For updating user details.
+	4. Dashboard with User Statistics.
+
+4. Map Integration (Leaflet.js)
+- Implemented Leaflet.js to visualize user locations:
+	1. Used react-leaflet to embed an interactive map in the dashboard.
+	2. Plotted user locations based on latitude/longitude from the database.
+	3. Displayed markers with popups containing postcode.
+	4. Allowed zoom and pan functionality to explore different user locations.
+
+5. Dashboard & User Statistics (Chart.js)
+- Created a real-time dashboard showing:
+    1. Total Users Created This Month
+    2. Total Users
+    3. Recent Signups This Month
+    4. Recent User Signups in a year
+    5. Active vs Blocked
+    6. Percentage of Active Users
+    7. Singapore Map of where the default address of users
 
 
 **Rianne Ong**<br>
