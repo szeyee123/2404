@@ -22,10 +22,12 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
     }
   }, [postalCode, error, loading]);
 
+  const userId = 1;
+
   // Fetch the list of addresses from the database
   const fetchAddresses = async () => {
     try {
-      const response = await axios.get("/user/1/addresses");
+      const response = await axios.get(`/user/${userId}/addresses`);
       setAddresses(response.data || []);
     } catch (error) {
       console.error('Error fetching addresses:', error);
@@ -80,7 +82,7 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
               isDefault: false,
             }));
             for (const address of updateAddresses) {
-              await axios.put(`/user/1/addresses/${address.id}`, address);
+              await axios.put(`/user/${userId}/addresses/${address.id}`, address);
             }
           }
         }
@@ -90,7 +92,6 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
           isDefault: data.isDefault === "true",
         };
 
-        const userId = 1;
         const url = existingAddress
           ? `/user/${userId}/addresses/${existingAddress.id}`
           : `/user/${userId}/addresses`;
