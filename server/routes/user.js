@@ -35,15 +35,19 @@ const getCoordinates = async (zipCode) => {
 // Route to get geocoded addresses
 router.get("/geocode", async (req, res) => {
     try {
-        // Assuming you want to fetch addresses from the Address model
         const addresses = await Address.findAll({
-            attributes: ['zipCode'] // Retrieve only the address field
+            attributes: ['zipCode'],
+            where: {
+                isDefault: true 
+            }
         });
 
-        // Map through the retrieved addresses and get coordinates
-        const geoData = await Promise.all(addresses.map(address => getCoordinates(address.zipCode)));
+        // Assuming zipCode is encrypted, decrypt it before passing it to getCoordinates
+        const geoData = await Promise.all(addresses.map(address => {
+            const decryptedZipCode = decrypt(address.zipCode);
+            return getCoordinates(decryptedZipCode);
+        }));
 
-        // Send back the geocoded data
         res.json(geoData.filter(data => data));
     } catch (error) {
         console.error("Error fetching addresses:", error);
