@@ -55,7 +55,7 @@ router.get("/geocode", async (req, res) => {
 // Create User with multiple addresses
 router.post('/', async (req, res) => {
     let data = req.body;
-    console.log(data)
+    console.log(data);
 
     const validationSchema = yup.object({
         name: yup.string().trim().min(3).max(100).required(),
@@ -84,11 +84,15 @@ router.post('/', async (req, res) => {
             status: data.status
         });
 
-        // Create Addresses and associate with user
+        // Encrypt addresses before saving
         const addresses = await Promise.all(
             data.addresses.map(address => {
                 return Address.create({
-                    ...address,
+                    address: encrypt(address.address),
+                    city: encrypt(address.city),
+                    country: encrypt(address.country),
+                    zipCode: encrypt(address.zipCode),
+                    isDefault: address.isDefault,
                     userId: user.id
                 });
             })
@@ -103,23 +107,42 @@ router.post('/', async (req, res) => {
 
 // Get All Users with their associated addresses
 router.get('/', async (req, res) => {
-    const search = req.query.search;
-    const condition = search ? {
-        [Op.or]: [
-            { name: { [Op.like]: `%${search}%` } },
-            { email: { [Op.like]: `%${search}%` } },
-            { number: { [Op.like]: `%${search}%` } },
-            { status: { [Op.like]: `%${search}%` } }
-        ]
-    } : {};
+    try {
+        const users = await User.findAll({
+            include: [Address],
+            order: [['createdAt', 'DESC']]
+        });
 
-    const users = await User.findAll({
-        where: condition,
-        include: [Address],
-        order: [['createdAt', 'DESC']]
-    });
-    res.json(users);
+        // Decrypt sensitive fields in the addresses
+        const decryptedUsers = users.map(user => {
+            const decryptedAddresses = user.Addresses.map(addr => {
+                try {
+                    return {
+                        ...addr.toJSON(),
+                        address: addr.address ? decrypt(addr.address) : null,
+                        city: addr.city ? decrypt(addr.city) : null,
+                        country: addr.country ? decrypt(addr.country) : null,
+                        zipCode: addr.zipCode ? decrypt(addr.zipCode) : null,
+                    };
+                } catch (error) {
+                    console.error("Failed to decrypt address:", error.message);
+                    return addr.toJSON(); 
+                }
+            });
+
+            return {
+                ...user.toJSON(),
+                Addresses: decryptedAddresses 
+            };
+        });
+
+        res.json(decryptedUsers);
+    } catch (err) {
+        console.error("Server error:", err.message);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
 });
+
 
 router.get("/status", async (req, res) => {
     const activeCount = await User.count({ where: { status: 'active' } });
