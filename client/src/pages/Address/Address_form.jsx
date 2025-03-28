@@ -59,7 +59,6 @@ function AddressFormPage({ existingAddress, onSubmit, onCancel }) {
       // Check if the address already exists in the database
       const duplicateAddress = addresses.find(
         (address) =>
-          address.id !== existingAddress?.id &&
           address.zipCode === data.zipCode &&
           address.address === data.address
       );
